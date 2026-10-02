@@ -1,0 +1,70 @@
+{
+  "name": "@websideproject/nuxt-cookie-consent",
+  "version": "0.1.0",
+  "description": "GDPR-compliant, intelligent, and fully customizable cookie consent module for Nuxt with Nuxt Scripts integration",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/websideproject/nuxt-cookie-consent.git"
+  },
+  "author": "Benjamin Gervan",
+  "license": "MIT",
+  "type": "module",
+  "keywords": [
+    "nuxt",
+    "nuxt-module",
+    "cookie-consent",
+    "gdpr",
+    "privacy",
+    "consent",
+    "cookies",
+    "nuxt-scripts"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/types.d.mts",
+      "import": "./dist/module.mjs"
+    }
+  },
+  "main": "./dist/module.mjs",
+  "typesVersions": {
+    "*": {
+      ".": [
+        "./dist/types.d.mts"
+      ]
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "nuxt-module-build build",
+    "dev:prepare": "nuxt-module-build build --stub && nuxt-module-build prepare",
+    "release": "bun run lint && bun run test && bun run build && changelogen --release && npm publish && git push --follow-tags",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "test": "NO_COLOR=1 vitest run --passWithNoTests",
+    "test:watch": "NO_COLOR=1 vitest watch",
+    "typecheck": "vue-tsc --noEmit"
+  },
+  "dependencies": {
+    "@nuxt/kit": "^3.19.1",
+    "@nuxt/scripts": "^0.11.13",
+    "defu": "^6.1.4"
+  },
+  "devDependencies": {
+    "@nuxt/module-builder": "^1.0.2",
+    "@nuxt/schema": "^3.13.0",
+    "changelogen": "^0.6.2",
+    "nuxt": "^4.4.2",
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.5",
+    "vue-tsc": "^3.2.8",
+    "@vue/test-utils": "^2.4.6",
+    "@vitejs/plugin-vue": "^5.2.1",
+    "happy-dom": "^15.11.7",
+    "vue": "^3.5.13"
+  }
+}

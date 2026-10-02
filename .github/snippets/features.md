@@ -1,0 +1,6 @@
+- ✅ **GDPR compliant** - Granular control, stale-cookie detection, and consent-gated cookie writing
+- 🧠 **Intelligent banner** - Only shows when a configured non-essential cookie actually requires it
+- 🌍 **Dynamic i18n** - Fully translatable UI with reactive locale switching (EN, DE, ES, FR built in)
+- ✨ **On-demand consent** - Ask for permission just-in-time with `useRequestConsent`
+- 🍪 **Consent-aware cookies** - `useConsentCookie` only persists after consent
+- 🚀 **Powered by Nuxt Scripts** - Consent-based triggers for efficient script loading

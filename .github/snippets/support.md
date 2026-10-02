@@ -1,0 +1,2 @@
+- **Issues**: [Open an issue](https://github.com/websideproject/nuxt-cookie-consent/issues) for bugs or feature requests
+- **Discussions**: [Join the discussion](https://github.com/websideproject/nuxt-cookie-consent/discussions) for questions and ideas

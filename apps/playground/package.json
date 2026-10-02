@@ -1,0 +1,25 @@
+{
+  "name": "nuxt-cookie-consent-playground",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "nuxt dev",
+    "dev:prepare": "nuxt prepare",
+    "build": "nuxt build",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "typecheck": "nuxt typecheck"
+  },
+  "dependencies": {
+    "@websideproject/nuxt-cookie-consent": "workspace:*",
+    "nuxt": "^4.4.2"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.1.11",
+    "@types/node": "^22.0.0",
+    "tailwindcss": "^4.1.11",
+    "vue-tsc": "^3.2.8"
+  }
+}
