@@ -69,7 +69,18 @@ categories: {
 }
 ```
 
-Category-level fields: `kind?`, `description?`, `requiresBanner?` (the last overrides the per-cookie heuristic for `cookie` categories too).
+Category-level fields: `kind?`, `description?`, `requiresBanner?` (the last overrides the per-cookie heuristic for `cookie` categories too), `defaultEnabled?`.
+
+### Default state (`defaultEnabled`)
+
+Before a visitor chooses, `necessary` is on, a `kind: 'tracking'` category **without** a banner is **on** (that is
+the opt-out), and everything else is off. `defaultEnabled` overrides it per category — `defaultEnabled: false` on a
+tracking category gives an **opt-in without a banner** (e.g. session replays: off until switched on from the FAB).
+
+### Consent cookie name (`cookieName`)
+
+The decision is stored in a cookie named `cookie_consent` by default; set `cookieConsent.cookieName` to rename it
+(every visitor then decides once more).
 
 ### Example
 
