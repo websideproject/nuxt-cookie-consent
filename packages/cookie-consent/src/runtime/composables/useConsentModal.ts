@@ -11,7 +11,7 @@ export function useConsentModal() {
 
   // A local, temporary state for the switches in the modal.
   // This is only committed to the global state when the user saves.
-  const localConsentState = ref({ ...$consent.state.value })
+  const localConsentState = ref<Record<ConsentCategory, boolean>>({ ...$consent.state.value })
 
   // The state for which accordion items are currently open.
   const openAccordions = ref(['necessary'])
