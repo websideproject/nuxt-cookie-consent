@@ -1,45 +1,38 @@
-# `@websideproject/nuxt-cookie-consent`
+# @websideproject/nuxt-cookie-consent
 
-A GDPR-compliant, intelligent, and highly customizable cookie consent module for Nuxt 3 & 4.
+[![npm version](https://img.shields.io/npm/v/@websideproject/nuxt-cookie-consent?color=black)](https://npmjs.com/package/@websideproject/nuxt-cookie-consent)
+[![npm downloads](https://img.shields.io/npm/dm/@websideproject/nuxt-cookie-consent?color=black)](https://npm.chart.dev/@websideproject/nuxt-cookie-consent)
+[![license](https://img.shields.io/github/license/websideproject/nuxt-cookie-consent?color=black)](https://github.com/websideproject/nuxt-cookie-consent/blob/main/LICENSE)
+
+Cookie and cookieless-tracking consent for Nuxt 4. Declare your categories in `nuxt.config.ts` and get a banner that
+only appears when something actually needs consent, a preferences modal, a floating settings button, and composables
+to gate scripts and cookies behind each category.
+
+- **Banner only when needed** — it appears on the first visit only if a configured category requires it
+- **Cookies and cookieless tracking** — `kind: 'cookie'` categories list provider and duration; `kind: 'tracking'` ones (e.g. cookieless analytics) are a plain toggle, opt-out by default
+- **Just-in-time consent** — `useRequestConsent` asks for one category at the moment a feature needs it
+- **Consent-gated cookies and scripts** — `useConsentCookie` writes only after consent; `$consent.triggers.<category>` loads a script through [Nuxt Scripts](https://scripts.nuxt.com) once granted
+- **No UI framework required** — the default components are plain CSS themed from your `colors`; override any of them with a same-named component in your own UI kit
+- **Headless** — use `$consent` and the composables as the consent store and render your own UI, or none
+- **Translatable** — every text, including categories, with runtime locale switching; English, German, Spanish and French built in
 
 > **Disclaimer:** This module provides tools to help you comply with privacy regulations like GDPR, but using it does not automatically guarantee compliance. You are solely responsible for ensuring your website's configuration, cookie descriptions, and overall privacy practices are compliant with all applicable laws in your users' jurisdictions. The author assumes no liability for any legal issues arising from its use. Always consult a legal professional for matters of legal compliance.
 
-## Features
-
-- ✅ **GDPR compliant** — granular control, stale-cookie detection, and consent-gated cookie writing.
-- 🧠 **Intelligent banner** — the initial banner only appears if a configured category actually requires it.
-- 🍪 **Cookies *and* cookieless tracking** — categories declare a `kind` (`'cookie'` | `'tracking'`); cookie categories render a provider/duration table, tracking categories render a plain toggle (no table) for honest cookieless analytics.
-- 🪶 **Zero UI-framework dependency** — the default banner/modal/FAB are **pure-CSS** (scoped styles + CSS variables from `colors`), so they work in any app. Runtime deps are just `@nuxt/kit` + `@nuxt/scripts` + `defu`.
-- 🌍 **Dynamic i18n** — fully translatable UI (including cookie categories) with secure link handling and reactive locale switching. Defaults for EN, DE, ES, FR.
-- ⚙️ **Fully configurable** — define categories, colors, and text in `nuxt.config.ts`.
-- ✨ **On-demand consent** — `useRequestConsent` asks for permission "just-in-time".
-- 🍪 **Consent-aware cookies** — `useConsentCookie` for effortless, compliant cookie management.
-- 🎨 **Overridable UI** — drop in a same-named component to replace any default with your own UI kit.
-- 🧩 **Usable as a pure state engine** — render your own UI entirely and use the composables/`$consent` as the consent store (see below).
-- 🚀 **Powered by Nuxt Scripts** — exposes consent-based triggers for efficient script loading.
-
-## Installation
+## Install
 
 ```bash
-# bun
-bun add -D @websideproject/nuxt-cookie-consent
-
-# pnpm
-pnpm add -D @websideproject/nuxt-cookie-consent
-
-# npm
-npm install -D @websideproject/nuxt-cookie-consent
+npm install @websideproject/nuxt-cookie-consent @nuxt/scripts
 ```
 
-Add it to your `modules`:
-
-```ts [nuxt.config.ts]
+```ts
+// nuxt.config.ts
 export default defineNuxtConfig({
   modules: ['@websideproject/nuxt-cookie-consent'],
 })
 ```
 
-The module installs [`@nuxt/scripts`](https://scripts.nuxt.com) automatically.
+The module registers [`@nuxt/scripts`](https://scripts.nuxt.com) (a peer dependency, `^1.0.0`) for you, so
+`useScript` and the consent triggers work without adding it to `modules`.
 
 ## Configuration
 
@@ -176,7 +169,8 @@ watch(() => route.path, (path) => {
 
 ### 3. Conditional script loading
 
-Each category exposes a consent trigger named after its key:
+Each category exposes a consent trigger named after its key. Pass it to Nuxt Scripts' `useScript`, and the script is
+requested only once that category is granted:
 
 ```vue
 <script setup lang="ts">
@@ -249,6 +243,19 @@ export default defineNuxtPlugin(() => {
 
 > **`triggers` caveat:** a trigger resolves once on grant and is **not** reset on revoke — it's ideal for `watch(state)` gating (above) and for `useScript({ trigger })` load-on-consent, but `useScript` won't *unload* a script when consent is later revoked. Use an in-memory kill-switch on the tracker (as above) when you need revoke-to-stop.
 
+## Documentation
+
+Full documentation: [websideproject.com/docs/nuxt-cookie-consent](https://websideproject.com/docs/nuxt-cookie-consent)
+
+- [Introduction](https://websideproject.com/docs/nuxt-cookie-consent/guide/introduction) · [Installation](https://websideproject.com/docs/nuxt-cookie-consent/guide/installation) · [Configuration](https://websideproject.com/docs/nuxt-cookie-consent/guide/configuration) · [Usage](https://websideproject.com/docs/nuxt-cookie-consent/guide/usage)
+- [Composables](https://websideproject.com/docs/nuxt-cookie-consent/guide/composables) · [Components](https://websideproject.com/docs/nuxt-cookie-consent/guide/components) · [Internationalization](https://websideproject.com/docs/nuxt-cookie-consent/guide/i18n)
+
+## Links
+
+- [GitHub](https://github.com/websideproject/nuxt-cookie-consent)
+- [Issues](https://github.com/websideproject/nuxt-cookie-consent/issues)
+- [Releases](https://github.com/websideproject/nuxt-cookie-consent/releases)
+
 ## License
 
-MIT — Benjamin Gervan
+[MIT](https://github.com/websideproject/nuxt-cookie-consent/blob/main/LICENSE)

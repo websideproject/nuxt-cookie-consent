@@ -14,6 +14,14 @@ async function toggleTheme() {
   }
 }
 
+// Consent-gated script: Nuxt Scripts only injects it once the `analytics` trigger resolves (on consent).
+const analyticsLoaded = ref(false)
+useScript('/analytics-demo.js', { trigger: $consent.triggers.analytics })
+onMounted(() => {
+  analyticsLoaded.value = !!(window as any).__analyticsDemoLoaded
+  window.addEventListener('analytics-demo-loaded', () => { analyticsLoaded.value = true })
+})
+
 async function requestAnalytics() {
   const granted = await useRequestConsent('analytics')
   alert(granted ? 'Analytics consent granted — load your scripts now.' : 'Analytics consent declined.')
@@ -54,6 +62,13 @@ async function requestAnalytics() {
             Enable analytics (needs <em>analytics</em>)
           </button>
         </div>
+        <p
+          class="muted"
+          data-testid="analytics-script"
+        >
+          Analytics script (<code>useScript</code> + <code>$consent.triggers.analytics</code>):
+          {{ analyticsLoaded ? 'loaded' : 'waiting for consent' }}
+        </p>
       </section>
 
       <section class="card">

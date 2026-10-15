@@ -1,21 +1,38 @@
-Use `nuxt` to install the module automatically:
+Install the module and its peer dependency:
 
 ```bash
-npx nuxt module add @websideproject/nuxt-cookie-consent
-```
-
-Or install manually:
-
-```bash
-# bun
-bun add -D @websideproject/nuxt-cookie-consent
+# npm
+npm install @websideproject/nuxt-cookie-consent @nuxt/scripts
 
 # pnpm
-pnpm add -D @websideproject/nuxt-cookie-consent
+pnpm add @websideproject/nuxt-cookie-consent @nuxt/scripts
 
-# npm
-npm install -D @websideproject/nuxt-cookie-consent
+# bun
+bun add @websideproject/nuxt-cookie-consent @nuxt/scripts
+```
 
-# yarn
-yarn add -D @websideproject/nuxt-cookie-consent
+Add it to your `nuxt.config.ts` and declare your categories:
+
+```typescript
+export default defineNuxtConfig({
+  modules: ['@websideproject/nuxt-cookie-consent'],
+  cookieConsent: {
+    categories: {
+      necessary: { readonly: true },
+      analytics: { kind: 'tracking', description: 'Cookieless, anonymous usage statistics.' },
+    },
+  },
+})
+```
+
+The module registers `@nuxt/scripts` itself, so don't add it to `modules`. Then render the components once, in
+`app.vue` or a layout:
+
+```vue
+<template>
+  <NuxtPage />
+  <CookieConsentBanner />
+  <CookieConsentModal />
+  <CookieConsentFab />
+</template>
 ```

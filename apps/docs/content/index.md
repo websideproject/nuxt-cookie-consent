@@ -1,7 +1,7 @@
 ---
 seo:
   title: nuxt-cookie-consent — GDPR cookie consent for Nuxt
-  description: A GDPR-compliant, intelligent, and fully customizable cookie consent module for Nuxt, powered by Nuxt Scripts.
+  description: Cookie and cookieless-tracking consent for Nuxt 4 — a banner only when needed, a preferences modal, and consent-gated scripts and cookies.
 ---
 
 ::u-page-hero
@@ -9,7 +9,7 @@ seo:
 Nuxt Cookie Consent
 
 #description
-A GDPR-compliant, intelligent, and fully customizable **cookie consent** module for Nuxt 3 & 4. Granular categories, just-in-time consent, dynamic i18n, and consent-gated script loading powered by [Nuxt Scripts](https://scripts.nuxt.com).
+**Cookie and cookieless-tracking consent** for Nuxt 4. Granular categories, just-in-time consent, dynamic i18n, and consent-gated script loading powered by [Nuxt Scripts](https://scripts.nuxt.com).
 
 #links
   :::u-button

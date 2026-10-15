@@ -1,6 +1,7 @@
-- ✅ **GDPR compliant** - Granular control, stale-cookie detection, and consent-gated cookie writing
-- 🧠 **Intelligent banner** - Only shows when a configured non-essential cookie actually requires it
-- 🌍 **Dynamic i18n** - Fully translatable UI with reactive locale switching (EN, DE, ES, FR built in)
-- ✨ **On-demand consent** - Ask for permission just-in-time with `useRequestConsent`
-- 🍪 **Consent-aware cookies** - `useConsentCookie` only persists after consent
-- 🚀 **Powered by Nuxt Scripts** - Consent-based triggers for efficient script loading
+- **Banner only when needed** — it appears on the first visit only if a configured category requires it
+- **Cookies and cookieless tracking** — `kind: 'cookie'` categories list provider and duration; `kind: 'tracking'` ones (e.g. cookieless analytics) are a plain toggle, opt-out by default
+- **Just-in-time consent** — `useRequestConsent` asks for one category at the moment a feature needs it
+- **Consent-gated cookies and scripts** — `useConsentCookie` writes only after consent; `$consent.triggers.<category>` loads a script through [Nuxt Scripts](https://scripts.nuxt.com) once granted
+- **No UI framework required** — the default components are plain CSS themed from your `colors`; override any of them with a same-named component in your own UI kit
+- **Headless** — use `$consent` and the composables as the consent store and render your own UI, or none
+- **Translatable** — every text, including categories, with runtime locale switching; English, German, Spanish and French built in
