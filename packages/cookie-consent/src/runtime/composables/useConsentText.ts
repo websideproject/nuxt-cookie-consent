@@ -15,7 +15,6 @@ export function useConsentText(key: string, replacements: Record<string, string>
   const locale = $consent.currentLocale.value
   const { fallbackLocale } = config
   // `texts`/`linkMap` are typed from the literal default config shape; treat them as open records for dynamic key lookup.
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- nested, runtime-defined i18n tree
   const texts = config.texts as Record<string, any>
   const linkMap = config.linkMap as Record<string, string>
 
@@ -43,7 +42,7 @@ export function useConsentText(key: string, replacements: Record<string, string>
       parts.push({ type: 'string', content: rawText.slice(lastIndex, match.index) })
     }
 
-    const linkKey = match[1]
+    const linkKey = match[1] ?? ''
     const linkText = texts[locale]?.links?.[linkKey] || texts[fallbackLocale]?.links?.[linkKey] || linkKey
     const href: string = texts[locale]?.linkMap?.[linkKey] || linkMap?.[linkKey] || '#'
 

@@ -2,11 +2,11 @@ import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { ref } from 'vue'
 import { mount } from '@vue/test-utils'
 
+import CookieConsentBanner from '../src/runtime/components/CookieConsentBanner.vue'
+
 const h = vi.hoisted(() => ({ banner: null as any }))
 vi.mock('../src/runtime/composables/useConsentBanner', () => ({ useConsentBanner: () => h.banner }))
 vi.mock('../src/runtime/composables/useConsentText', () => ({ useConsentText: () => [{ type: 'string', content: 'We use cookies.' }] }))
-
-import CookieConsentBanner from '../src/runtime/components/CookieConsentBanner.vue'
 
 // L3 — the initial consent banner: renders when required, and its two actions wire to customize/acceptAll.
 describe('<CookieConsentBanner>', () => {

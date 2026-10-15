@@ -10,7 +10,7 @@ export default defineNuxtPlugin((nuxtApp) => {
 
   // A fresh default state for the current config (opt-out tracking on, everything else off — see default-state.ts).
   const createDefaultState = (): Record<string, boolean> =>
-    defaultConsentState(config.categories as Record<string, CategoryOptions>)
+    defaultConsentState(config.categories as unknown as Record<string, CategoryOptions>)
 
   // --- INITIALIZATION WITH SHAPE VALIDATION ---
   const rawCookie = useCookie<Record<string, boolean> | undefined>(cookieName).value
@@ -38,7 +38,7 @@ export default defineNuxtPlugin((nuxtApp) => {
       const mergedState = createDefaultState()
       Object.keys(rawCookie).forEach((key) => {
         if (key in mergedState) {
-          mergedState[key] = rawCookie[key]
+          mergedState[key] = rawCookie[key] === true
         }
       })
       initialState = mergedState

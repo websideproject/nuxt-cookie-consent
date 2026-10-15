@@ -2,13 +2,13 @@ import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { ref } from 'vue'
 import { mount } from '@vue/test-utils'
 
+import CookieConsentFab from '../src/runtime/components/CookieConsentFab.vue'
+
 // L3 — render the actual SFC. The composable (decision logic) is mocked so this verifies the COMPONENT
 // wiring: v-if on isVisible, and the click → openModal binding. `#imports` only supplies `computed`.
 const h = vi.hoisted(() => ({ fab: null as any }))
 // `#imports` (→ computed) comes from the alias stub in vitest.config; just mock the composable.
 vi.mock('../src/runtime/composables/useConsentFab', () => ({ useConsentFab: () => h.fab }))
-
-import CookieConsentFab from '../src/runtime/components/CookieConsentFab.vue'
 
 describe('<CookieConsentFab>', () => {
   beforeEach(() => { h.fab = { isVisible: ref(true), openModal: vi.fn(), colors: {} } })

@@ -1,5 +1,9 @@
 import { describe, it, expect, vi } from 'vitest'
 
+import { useConsentBanner } from '../src/runtime/composables/useConsentBanner'
+import { useConsentFab } from '../src/runtime/composables/useConsentFab'
+import { useConsentModal } from '../src/runtime/composables/useConsentModal'
+
 // The consent composables hold the GDPR decision logic (banner/fab visibility = the requiresInitialConsent
 // matrix; accept-all / save-selection commit choices). They're Nuxt-coupled via #imports — stub it with
 // minimal reactivity fakes (`.value` get/set + lazy computed; the composables use nothing else) and a
@@ -14,10 +18,6 @@ vi.mock('#imports', () => ({
   useRuntimeConfig: () => ({ public: { cookieConsent: env.config } }),
 }))
 
-import { useConsentBanner } from '../src/runtime/composables/useConsentBanner'
-import { useConsentFab } from '../src/runtime/composables/useConsentFab'
-import { useConsentModal } from '../src/runtime/composables/useConsentModal'
-
 function setup(opts: { requiresInitialConsent?: boolean, hasMadeChoice?: boolean, state?: Record<string, boolean>, categories?: Record<string, any> } = {}) {
   const updateState = vi.fn()
   env.consent = {
@@ -25,7 +25,7 @@ function setup(opts: { requiresInitialConsent?: boolean, hasMadeChoice?: boolean
     state: r(opts.state ?? { necessary: true, analytics: false }),
     isModalOpen: r(false),
     requestContext: r(null),
-    currentLocale: r("en"),
+    currentLocale: r('en'),
     updateState,
   }
   env.config = {
@@ -88,7 +88,8 @@ describe('useConsentModal', () => {
   it('saveSelection commits the per-category local choices', () => {
     const { updateState, consent } = setup()
     const modal = useConsentModal()
-    modal.localConsentState.value = { necessary: true, analytics: true }
+    // `analytics` is not in the module's default categories, which is what ConsentCategory resolves to here.
+    modal.localConsentState.value = { necessary: true, analytics: true } as any
     modal.saveSelection()
     expect(updateState).toHaveBeenCalledWith({ necessary: true, analytics: true })
     expect(consent.isModalOpen.value).toBe(false)
