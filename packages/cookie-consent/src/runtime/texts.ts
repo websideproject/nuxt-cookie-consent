@@ -12,8 +12,8 @@ export const defaultTexts = {
     cookieProvider: 'Provider',
     cookieDuration: 'Duration',
     links: {
-      privacyLink: 'Privacy Policy',
-      imprintLink: 'Imprint',
+      privacy: 'Privacy Policy',
+      imprint: 'Imprint',
     },
     categories: {
       necessary: { name: 'Necessary Cookies', description: 'These cookies are essential for the website to function properly and cannot be disabled.' },
