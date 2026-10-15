@@ -1,0 +1,24 @@
+# Area labels, applied by .github/workflows/label-pr.yml from the paths a PR changes. They are the release-note
+# sections (.github/release-drafter.yml): a PR is listed under every area it changes.
+#
+# A file counts only when it is not a package.json: a dependency bump (Renovate) touches the package.json of every
+# workspace, and would otherwise be listed under every section. It is listed under Dependencies instead.
+
+'area: module':
+  - changed-files:
+      - all-globs-to-any-file:
+          - packages/cookie-consent/**
+          - '!packages/cookie-consent/package.json'
+
+'area: playground':
+  - changed-files:
+      - all-globs-to-any-file:
+          - apps/playground/**
+          - '!apps/playground/package.json'
+
+'area: docs':
+  - changed-files:
+      - any-glob-to-any-file:
+          - apps/docs/content/**
+          - apps/docs/public/**
+          - '**/README.md'
