@@ -13,6 +13,7 @@
     "typecheck": "nuxt typecheck"
   },
   "dependencies": {
+    "@nuxt/scripts": "^1.3.12",
     "@websideproject/nuxt-cookie-consent": "workspace:*",
     "nuxt": "^4.4.2"
   },

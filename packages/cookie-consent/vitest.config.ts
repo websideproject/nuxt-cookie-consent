@@ -10,9 +10,18 @@ export default defineConfig({
   resolve: {
     alias: {
       '#imports': fileURLToPath(new URL('./test/helpers/imports-stub.ts', import.meta.url)),
+      // useConsentCookie imports useCookie from '#app'; same stub (coverage loads every runtime file).
+      '#app': fileURLToPath(new URL('./test/helpers/imports-stub.ts', import.meta.url)),
     },
   },
   test: {
     environment: 'happy-dom',
+    coverage: {
+      provider: 'istanbul',
+      include: ['src/runtime/**/*.{ts,vue}'],
+      exclude: ['src/**/*.d.ts'],
+      reporter: ['text', 'html', 'json-summary'],
+      reportsDirectory: './coverage',
+    },
   },
 })

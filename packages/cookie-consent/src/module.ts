@@ -19,7 +19,7 @@ export default defineNuxtModule<ModuleOptions>({
     name: '@websideproject/nuxt-cookie-consent',
     configKey: 'cookieConsent',
     compatibility: {
-      nuxt: '^3.0.0 || ^4.0.0',
+      nuxt: '>=4.0.0',
     },
   },
   defaults: {
