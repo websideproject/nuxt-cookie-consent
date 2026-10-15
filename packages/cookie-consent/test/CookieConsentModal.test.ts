@@ -2,14 +2,14 @@ import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { ref } from 'vue'
 import { mount } from '@vue/test-utils'
 
+import CookieConsentModal from '../src/runtime/components/CookieConsentModal.vue'
+
 // L3 — the settings modal (pure-CSS, no Nuxt UI). The decision logic lives in useConsentModal (tested
 // in consent-composables); here we verify the COMPONENT wiring: open gate, one row per category, and
 // the footer actions calling saveSelection / acceptAll.
 const m = vi.hoisted(() => ({ modal: null as any }))
 vi.mock('../src/runtime/composables/useConsentModal', () => ({ useConsentModal: () => m.modal }))
 vi.mock('../src/runtime/composables/useConsentText', () => ({ useConsentText: () => [{ type: 'string', content: 'x' }] }))
-
-import CookieConsentModal from '../src/runtime/components/CookieConsentModal.vue'
 
 describe('<CookieConsentModal>', () => {
   beforeEach(() => {

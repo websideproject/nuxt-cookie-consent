@@ -24,7 +24,7 @@
       "cache": false
     },
     "test": {
-      "dependsOn": ["build"]
+      "dependsOn": ["^build"]
     },
     "typecheck": {
       "dependsOn": ["transit"]

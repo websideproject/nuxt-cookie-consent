@@ -1,5 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 
+import { useConsentText } from '../src/runtime/composables/useConsentText'
+
 // useConsentText is Nuxt-coupled (reads texts/locale via #imports) — stub #imports so the link-parsing
 // logic (placeholder replacement → string/link tokenization, locale + linkMap fallbacks) can be tested.
 const state = vi.hoisted(() => ({ locale: 'en' }))
@@ -18,8 +20,6 @@ vi.mock('#imports', () => ({
   } } }),
   useNuxtApp: () => ({ $consent: { currentLocale: { value: state.locale } } }),
 }))
-
-import { useConsentText } from '../src/runtime/composables/useConsentText'
 
 describe('useConsentText', () => {
   beforeEach(() => { state.locale = 'en' })
