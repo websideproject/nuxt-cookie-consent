@@ -18,10 +18,17 @@ Here are the available types and scopes:
 - refactor (a code change that neither fixes a bug nor adds a feature) 🛠
 - revert (reverts a previous commit) 🔄
 
+The type sets the PR's label and the version bump: `breaking`, or a `!` after the type (`feat!:`), is a minor
+release while the package is 0.x; every other type — `feat` included — is a patch. A `release: minor` or
+`release: major` label, added by hand to any PR in the release, makes the whole release that size. The `deps`
+scope is labelled `dependencies`. The release notes are grouped by area, from labels (`area: module`,
+`area: playground`, `area: docs`) that follow the changed paths.
+
 ### Scopes
 - docs (the documentation)
 - playground (the playground)
 - module (the module)
+- deps (dependency updates)
 -->
 
 ### 🔗 Linked issue
