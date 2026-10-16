@@ -50,6 +50,13 @@ export default defineNuxtPlugin((nuxtApp) => {
   const consentState = useState<Record<string, boolean>>('cookie-consent-state', () => initialState)
   const currentLocale = useState<string>('cookie-consent-locale', () => config.locale)
 
+  // A prerendered or cached page carries the state it was rendered with — the defaults, since there was no
+  // visitor cookie — and useState hydrates from that payload instead of running the initializers above. In
+  // the browser the visitor's cookie is the source of truth, so re-apply it before anything reads the state.
+  // (On the server this is the value the initializers just set from the same cookie.)
+  hasMadeChoice.value = isConsentComplete
+  consentState.value = initialState
+
   const consentCookie = useCookie<Record<string, boolean>>(cookieName, {
     maxAge: 365 * 24 * 60 * 60, // 1 year
   })
