@@ -36,6 +36,9 @@ describe('<CookieConsentFab>', () => {
   it('applies the configured colors as CSS custom properties', () => {
     h.fab = { isVisible: ref(true), openModal: vi.fn(), colors: { secondary: 'rebeccapurple' } }
     const w = mount(CookieConsentFab)
-    expect(w.find('.cc-fab').attributes('style')).toContain('--cc-secondary: rebeccapurple')
+    const style = w.find('.cc-fab').attributes('style')
+    expect(style).toContain('--cc-secondary-light: rebeccapurple')
+    // no darkColors: dark mode keeps the same colour
+    expect(style).toContain('--cc-secondary-dark: rebeccapurple')
   })
 })

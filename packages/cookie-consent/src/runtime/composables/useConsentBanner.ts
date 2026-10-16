@@ -4,6 +4,7 @@ export function useConsentBanner() {
   const { $consent } = useNuxtApp()
   const config = useRuntimeConfig().public.cookieConsent
   const colors = config.colors
+  const darkColors = config.darkColors
 
   /**
    * Determines if the initial consent banner should be visible.
@@ -33,5 +34,6 @@ export function useConsentBanner() {
     acceptAll,
     customize,
     colors,
+    darkColors,
   }
 }

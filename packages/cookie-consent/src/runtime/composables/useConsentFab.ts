@@ -4,6 +4,7 @@ export function useConsentFab() {
   const { $consent } = useNuxtApp()
   const config = useRuntimeConfig().public.cookieConsent
   const colors = config.colors
+  const darkColors = config.darkColors
 
   /**
    * Determines if the floating action button should be visible.
@@ -25,5 +26,6 @@ export function useConsentFab() {
     isVisible,
     openModal,
     colors,
+    darkColors,
   }
 }

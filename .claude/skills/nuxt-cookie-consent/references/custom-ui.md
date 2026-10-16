@@ -46,7 +46,8 @@ const { isOpen, categories, localConsentState, contextualMessage, acceptAll, sav
         <strong>{{ useConsentText(`categories.${String(key)}.name`)[0].content }}</strong>
         <input v-model="localConsentState[key]" type="checkbox" :disabled="category.readonly">
       </label>
-      <!-- kind 'cookie': render category.cookies (id, provider, duration); kind 'tracking': category.description -->
+      <!-- kind 'cookie': render category.cookies (id, provider, duration); kind 'tracking': category.description.
+           provider, duration and description may be per-locale objects: render them with useConsentLocalized(…) -->
     </section>
     <button @click="saveSelection">{{ useConsentText('acceptSelectionBtn')[0].content }}</button>
     <button @click="acceptAll">{{ useConsentText('acceptAllBtn')[0].content }}</button>
