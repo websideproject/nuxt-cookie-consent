@@ -144,6 +144,33 @@ async function toggleTheme() {
 
 Give such a cookie `requiresBanner: false` so it does not force the first-visit banner.
 
+### Theme and language without a banner
+
+Preferences need no first-visit banner: declare their cookies with `requiresBanner: false`, and ask on first use.
+
+```ts
+// nuxt.config.ts — Nuxt color mode writes its storage only when the preference changes
+colorMode: { storage: 'cookie', storageKey: 'theme_preference' },
+```
+
+```ts
+const colorMode = useColorMode()
+async function toggleColorMode() {
+  if (!(await useRequestConsent('preferences'))) return // declined: no change, no cookie
+  colorMode.preference = colorMode.value === 'dark' ? 'light' : 'dark'
+}
+
+const { $consent } = useNuxtApp()
+const locale = useConsentCookie<'en' | 'de'>('locale_preference', 'preferences', { default: () => 'en' })
+watch(locale, v => $consent.setLocale(v ?? 'en'), { immediate: true })
+async function switchLanguage(next: 'en' | 'de') {
+  await useRequestConsent('preferences') // asks only while not granted
+  locale.value = next                    // changes either way; written to the cookie only with consent
+}
+```
+
+Do NOT use a plain `useCookie` (or color mode's default localStorage) for these — that stores before consent.
+
 ### Cookieless analytics (opt-out, no banner)
 
 ```ts

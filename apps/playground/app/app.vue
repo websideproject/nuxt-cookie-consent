@@ -11,9 +11,17 @@ useSeoMeta({
 // The cookie-consent module auto-provides $consent and auto-imports its composables.
 const { $consent } = useNuxtApp()
 
-// The language works without consent, but is only remembered (written to its cookie) once "preferences" is granted.
+// The language is a preference cookie: switching it asks for "preferences" first (the modal opens). The language
+// changes either way, since switching needs no cookie; only remembering it does, and useConsentCookie writes the
+// cookie only once "preferences" is granted. Until then: no cookie, and no banner needed for it.
 const locale = useConsentCookie<'en' | 'de'>('locale_preference', 'preferences', { default: () => 'en' })
 watch(locale, value => $consent.setLocale(value ?? 'en'), { immediate: true })
+
+async function switchLanguage() {
+  const next = locale.value === 'en' ? 'de' : 'en'
+  await useRequestConsent('preferences')
+  locale.value = next
+}
 
 const { toggle: toggleColorMode } = useColorModeToggle()
 
@@ -154,12 +162,13 @@ async function requestAnalytics() {
                 variant="outline"
                 icon="i-lucide-languages"
                 label="Switch language (EN/DE)"
-                @click="locale = locale === 'en' ? 'de' : 'en'"
+                @click="switchLanguage"
               />
             </div>
             <template #footer>
               <p class="text-sm text-muted">
-                The language is remembered (<code>useConsentCookie</code>) only once <em>preferences</em> is granted.
+                Switching the language or the colour mode asks for <em>preferences</em>; until it is granted no cookie is
+                written, so neither needs the banner.
               </p>
             </template>
           </UCard>

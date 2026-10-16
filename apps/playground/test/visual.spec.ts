@@ -67,7 +67,12 @@ const SHOTS: Shot[] = [
   {
     name: 'modal-de', viewport: DESKTOP_TALL, crop: dialog,
     act: async (page) => {
+      // Switching the language asks for "preferences" first; dismissed (backdrop click), it switches anyway —
+      // only remembering it needs the cookie
       await page.getByRole('button', { name: 'Switch language (EN/DE)' }).click()
+      await expect(dialog(page)).toContainText('please grant consent for Preference Cookies')
+      await page.locator('.cc-overlay').click({ position: { x: 5, y: 5 } })
+      await expect(dialog(page)).toBeHidden()
       await customize(page, 'Anpassen')
       await expect(dialog(page)).toContainText('Cookie-Einstellungen')
     },

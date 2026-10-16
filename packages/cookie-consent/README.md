@@ -45,6 +45,11 @@ The module shows the initial consent banner *only if necessary*, controlled by t
 
 If **all** non-essential cookies set `requiresBanner: false`, no banner shows on first visit — only the floating settings button appears.
 
+This is how a theme or language preference works without a banner: nothing is stored on the first visit; when the
+visitor first switches the theme or the language, `useRequestConsent('preferences')` opens the modal, and the cookie
+is written only on a yes (the language can still change for the visit on a no — only remembering it needs the
+cookie). See [Preferences without a banner](https://websideproject.com/docs/nuxt-cookie-consent/guide/usage#preferences-without-a-banner-theme-language).
+
 ### Cookie vs cookieless tracking categories (`kind`)
 
 A category declares what it represents:
