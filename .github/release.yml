@@ -1,46 +1,22 @@
+# GitHub's "Generate release notes" button. Releases are drafted by Release Drafter (.github/release-drafter.yml);
+# these are the same sections, but GitHub puts each PR only in the FIRST section it matches.
 changelog:
-  exclude:
-    labels:
-      - ignore-for-release
-    authors:
-      - octocat
   categories:
-    - title: Breaking Changes 💥
+    - title: 💥 Breaking Changes
       labels:
         - breaking
-    - title: Features 🚀
+    - title: 📦 Module
       labels:
-        - feature
-    - title: Enhancements 🌈
+        - 'area: module'
+    - title: 🧪 Playground
       labels:
-        - enhancement
-    - title: Bug Fixes 🐞
+        - 'area: playground'
+    - title: 📚 Documentation
       labels:
-        - bug
-    - title: Build System 🛠
-      labels:
-        - build
-    - title: Continuous Integration 🔄
-      labels:
-        - ci
-    - title: Documentation 📚
-      labels:
-        - documentation
-    - title: Tests 🧪
-      labels:
-        - test
-    - title: Refactoring 🛠
-      labels:
-        - refactor
-    - title: Dependency Updates 📦
+        - 'area: docs'
+    - title: ⬆️ Dependencies
       labels:
         - dependencies
-    - title: Performance Improvements ⚡️
+    - title: Other Changes
       labels:
-        - performance
-    - title: Style 💅
-      labels:
-        - style
-    - title: Revert 🔄
-      labels:
-        - revert
+        - '*'

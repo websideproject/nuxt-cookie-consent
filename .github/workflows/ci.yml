@@ -99,7 +99,51 @@ jobs:
           path: apps/playground/test-results
           retention-days: 14
 
-  publish:
+  # Nuxt 5 is not released yet: run the module's typecheck and tests against the nightly so breakage shows up early.
+  # Informational — it does not block the pipeline. The nightly is forced for the whole workspace with `overrides`: a
+  # `bun add` in the package is not enough, because the package's `nuxt` peer dependency keeps a nested Nuxt 4 that
+  # the build would load against the nightly's Nitro. Same job as nuxt-auto's and nuxt-protokit's.
+  test-nuxt-5:
+    name: test (nuxt 5 nightly)
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - name: Use the Nuxt 5 nightly
+        # `5x` is a dist-tag; bun reads it as a version range inside an npm: alias, so resolve it with npm first.
+        run: |
+          V=$(npm view nuxt-nightly@5x version)
+          echo "Nuxt 5 nightly: $V"
+          node -e "
+            const fs = require('fs')
+            const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'))
+            pkg.overrides = {
+              'nuxt': 'npm:nuxt-nightly@$V',
+              '@nuxt/kit': 'npm:@nuxt/kit-nightly@$V',
+              '@nuxt/schema': 'npm:@nuxt/schema-nightly@$V',
+            }
+            fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2))
+          "
+          bun install
+      - name: Prepare
+        run: bun run dev:prepare
+      - name: Typecheck
+        working-directory: packages/cookie-consent
+        run: bun run typecheck
+      - name: Test
+        working-directory: packages/cookie-consent
+        run: bun run test
+
+  # PR previews: every pull request publishes an installable build of the module to pkg.pr.new and comments the
+  # install command on the PR (README → PR Previews). Needs the pkg.pr.new GitHub App on the repo (installed
+  # org-wide): https://github.com/apps/pkg-pr-new. Same job as nuxt-auto's and nuxt-protokit's `preview`.
+  preview:
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch'
     needs: [build, lint, typecheck, test]
@@ -116,5 +160,5 @@ jobs:
         run: bun run dev:prepare
       - name: Build module
         run: bun run build:module
-      - name: Publish
+      - name: Publish preview
         run: bunx pkg-pr-new publish --compact --no-template './packages/cookie-consent'
