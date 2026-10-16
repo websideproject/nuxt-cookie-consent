@@ -17,11 +17,14 @@ export interface ColorOptions {
   borderInput: string
 }
 
+/** One string for every locale, or one per locale (`{ en: '1 year', de: '1 Jahr' }`). See `useConsentLocalized`. */
+export type LocalizedString = string | Record<string, string>
+
 export interface CookieDefinition {
   id: string
   descriptionKey: string
-  provider: string
-  duration: string
+  provider: LocalizedString
+  duration: LocalizedString
   requiresBanner?: boolean
 }
 
@@ -34,8 +37,11 @@ export interface CategoryOptions {
    *   on/off switch + description, NO cookie table, and `cookies[]` is not required.
    */
   kind?: 'cookie' | 'tracking'
-  /** Plain-text description shown in the modal (esp. for `'tracking'` items). Falls back to the i18n key. */
-  description?: string
+  /**
+   * Description shown in the modal (esp. for `'tracking'` items), one string or one per locale. Falls back to the
+   * `categories.<key>.description` text.
+   */
+  description?: LocalizedString
   /**
    * Whether this category forces the initial consent banner. Overrides the per-cookie heuristic when
    * set. For `'tracking'` categories the banner is shown ONLY when this is `true` (default: opt-out, no

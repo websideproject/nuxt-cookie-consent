@@ -1,15 +1,12 @@
 <script setup lang="ts">
 import { computed } from '#imports'
 import { useConsentFab } from '../composables/useConsentFab'
+import { consentColorVars } from '../css-vars'
 
 // Pure-CSS, dependency-free default (P12.M2). Inline SVG cookie icon — no icon library dependency.
-const { isVisible, openModal, colors } = useConsentFab()
+const { isVisible, openModal, colors, darkColors } = useConsentFab()
 
-const cssVars = computed(() => ({
-  '--cc-secondary': colors.secondary ?? 'hsl(240 4.8% 95.9%)',
-  '--cc-secondary-fg': colors.secondaryForeground ?? 'hsl(240 5.9% 10%)',
-  '--cc-border': colors.border ?? 'hsl(240 5.9% 90%)',
-}))
+const cssVars = computed(() => consentColorVars(colors, darkColors))
 </script>
 
 <template>
@@ -47,6 +44,17 @@ const cssVars = computed(() => ({
 </template>
 
 <style scoped>
+/* light or dark set of the inline colour variables (consentColorVars) */
+.cc-fab {
+  --cc-secondary: var(--cc-secondary-light);
+  --cc-secondary-fg: var(--cc-secondary-fg-light);
+  --cc-border: var(--cc-border-light);
+}
+.dark .cc-fab {
+  --cc-secondary: var(--cc-secondary-dark);
+  --cc-secondary-fg: var(--cc-secondary-fg-dark);
+  --cc-border: var(--cc-border-dark);
+}
 .cc-fab {
   position: fixed;
   bottom: 1rem;

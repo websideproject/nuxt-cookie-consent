@@ -62,6 +62,7 @@ export default defineNuxtConfig({
 | `texts` | `Record<locale, …>` | built-in | Deep-merged over the defaults. Placeholders `{privacy}` / `{imprint}` become links via `linkMap`. |
 | `linkMap` | `Record<string, string>` | `{ privacy: '/privacy-policy', imprint: '/imprint' }` | Routes for the text placeholders. |
 | `colors` | `Partial<ColorOptions>` | neutral palette | CSS variables for the default components: `background`, `foreground`, `primary`, `primaryForeground`, `secondary`, `secondaryForeground`, `border`, `borderInput`. |
+| `darkColors` | `Partial<ColorOptions> \| false` | dark neutral palette | Used instead of `colors` under a `.dark` ancestor (Nuxt color mode's class on `<html>`). `false` = `colors` in both modes. |
 | `cookieName` | `string` | `'cookie_consent'` | Renaming it makes every visitor decide again. |
 
 ### `CategoryOptions`
@@ -70,8 +71,8 @@ export default defineNuxtConfig({
 |---|---|
 | `readonly` | Always on, cannot be toggled (use for `necessary`). |
 | `kind` | `'cookie'` (default): modal shows a provider/duration table from `cookies[]`. `'tracking'`: a plain toggle + `description`, no table, `cookies[]` not needed (cookieless analytics). |
-| `cookies` | `{ id, descriptionKey, provider, duration, requiresBanner? }[]` — `descriptionKey` is a path into `texts`. |
-| `description` | Plain text shown in the modal (mainly for `kind: 'tracking'`). |
+| `cookies` | `{ id, descriptionKey, provider, duration, requiresBanner? }[]` — `descriptionKey` is a path into `texts`; `provider` and `duration` are a string or one per locale (`{ en: '1 year', de: '1 Jahr' }`). |
+| `description` | Shown in the modal (mainly for `kind: 'tracking'`); a string or one per locale. Falls back to `texts.<locale>.categories.<key>.description`. |
 | `requiresBanner` | Forces (or suppresses) the first-visit banner for this category. |
 | `defaultEnabled` | State before the visitor chooses. |
 
@@ -104,9 +105,10 @@ $consent.setLocale('de')
 | `useRequestConsent(category)` | `Promise<boolean>`. Resolves `true` immediately if granted (or `'necessary'`); otherwise opens the modal with a context message and resolves with the choice when it closes. |
 | `useConsentCookie<T>(name, category, cookieOptions)` | Like `useCookie`, but the value is only written to the cookie while the category is granted; it is read back once consent is given. Takes `useCookie` options (`default`, `maxAge`, …). |
 | `useConsentText(key, replacements?)` | Localized text as a non-empty array of parts `{ type: 'string' \| 'link', content, href? }`, so `{privacy}`-style placeholders render as links. `[0].content` for plain strings. |
-| `useConsentBanner()` | `{ isVisible, acceptAll, customize, colors }` |
-| `useConsentModal()` | `{ isOpen, categories, localConsentState, openAccordions, contextualMessage, acceptAll, saveSelection, closeModal, toggleAccordion, colors }` — `categories` is `[key, CategoryOptions][]`; `contextualMessage` is text parts (empty unless opened by `useRequestConsent`). |
-| `useConsentFab()` | `{ isVisible, openModal, colors }` — visible once a choice is made, or from the start when no banner is required. |
+| `useConsentLocalized(value)` | A `provider` / `duration` / `description` value in the active locale (string as-is; `{ en, de }` by locale, then `fallbackLocale`). |
+| `useConsentBanner()` | `{ isVisible, acceptAll, customize, colors, darkColors }` |
+| `useConsentModal()` | `{ isOpen, categories, localConsentState, openAccordions, contextualMessage, acceptAll, saveSelection, closeModal, toggleAccordion, colors, darkColors }` — `categories` is `[key, CategoryOptions][]`; `contextualMessage` is text parts (empty unless opened by `useRequestConsent`). |
+| `useConsentFab()` | `{ isVisible, openModal, colors, darkColors }` — visible once a choice is made, or from the start when no banner is required. |
 
 ## Common patterns
 
@@ -142,6 +144,33 @@ async function toggleTheme() {
 
 Give such a cookie `requiresBanner: false` so it does not force the first-visit banner.
 
+### Theme and language without a banner
+
+Preferences need no first-visit banner: declare their cookies with `requiresBanner: false`, and ask on first use.
+
+```ts
+// nuxt.config.ts — Nuxt color mode writes its storage only when the preference changes
+colorMode: { storage: 'cookie', storageKey: 'theme_preference' },
+```
+
+```ts
+const colorMode = useColorMode()
+async function toggleColorMode() {
+  if (!(await useRequestConsent('preferences'))) return // declined: no change, no cookie
+  colorMode.preference = colorMode.value === 'dark' ? 'light' : 'dark'
+}
+
+const { $consent } = useNuxtApp()
+const locale = useConsentCookie<'en' | 'de'>('locale_preference', 'preferences', { default: () => 'en' })
+watch(locale, v => $consent.setLocale(v ?? 'en'), { immediate: true })
+async function switchLanguage(next: 'en' | 'de') {
+  await useRequestConsent('preferences') // asks only while not granted
+  locale.value = next                    // changes either way; written to the cookie only with consent
+}
+```
+
+Do NOT use a plain `useCookie` (or color mode's default localStorage) for these — that stores before consent.
+
 ### Cookieless analytics (opt-out, no banner)
 
 ```ts
@@ -153,7 +182,7 @@ categories: {
 
 ## Custom UI
 
-The default components are plain CSS (themed by `colors`), registered with negative priority — a component with the
+The default components are plain CSS (themed by `colors`, and by `darkColors` under `.dark`), registered with negative priority — a component with the
 same name in the app (`CookieConsentBanner.vue`, `CookieConsentModal.vue`, `CookieConsentFab.vue`) replaces it.
 Build it on the composables above; see [references/custom-ui.md](references/custom-ui.md).
 

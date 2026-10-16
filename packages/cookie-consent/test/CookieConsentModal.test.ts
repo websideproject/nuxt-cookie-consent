@@ -10,6 +10,11 @@ import CookieConsentModal from '../src/runtime/components/CookieConsentModal.vue
 const m = vi.hoisted(() => ({ modal: null as any }))
 vi.mock('../src/runtime/composables/useConsentModal', () => ({ useConsentModal: () => m.modal }))
 vi.mock('../src/runtime/composables/useConsentText', () => ({ useConsentText: () => [{ type: 'string', content: 'x' }] }))
+// The visitor reads German; the fallback locale is English
+vi.mock('../src/runtime/composables/useConsentLocalized', async () => {
+  const { localize } = await import('../src/runtime/localize')
+  return { useConsentLocalized: (v: any) => localize(v, 'de', 'en') }
+})
 
 describe('<CookieConsentModal>', () => {
   beforeEach(() => {
@@ -44,6 +49,18 @@ describe('<CookieConsentModal>', () => {
     expect(m.modal.acceptAll).toHaveBeenCalledTimes(1)
     await w.find('.cc-btn--outline').trigger('click')
     expect(m.modal.saveSelection).toHaveBeenCalledTimes(1)
+  })
+
+  it('shows a cookie\'s provider and duration, and a category\'s description, in the active locale', () => {
+    m.modal.categories = ref([
+      ['analytics', { cookies: [{ id: '_ga', descriptionKey: 'k', provider: 'Google LLC', duration: { en: '2 years', de: '2 Jahre' } }] }],
+      ['statistics', { kind: 'tracking', description: { en: 'Cookieless statistics', de: 'Cookielose Statistik' } }],
+    ])
+    const w = mount(CookieConsentModal, { global: { stubs: { teleport: true } } })
+    expect(w.find('.cc-table tbody').text()).toContain('Google LLC')
+    expect(w.find('.cc-table tbody').text()).toContain('2 Jahre')
+    expect(w.text()).toContain('Cookielose Statistik')
+    expect(w.text()).not.toContain('2 years')
   })
 
   it('clicking the overlay backdrop closes the modal', async () => {

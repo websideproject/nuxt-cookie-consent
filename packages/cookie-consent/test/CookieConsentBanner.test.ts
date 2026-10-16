@@ -19,6 +19,13 @@ describe('<CookieConsentBanner>', () => {
     expect(w.findAll('button.cc-btn').length).toBe(2)
   })
 
+  it('carries the light and the dark colours, so a .dark ancestor can switch between them', () => {
+    h.banner = { ...h.banner, colors: { background: 'white' }, darkColors: { background: 'black' } }
+    const style = mount(CookieConsentBanner).find('.cc-banner').attributes('style')
+    expect(style).toContain('--cc-bg-light: white')
+    expect(style).toContain('--cc-bg-dark: black')
+  })
+
   it('is hidden when not visible', () => {
     h.banner = { isVisible: ref(false), acceptAll: vi.fn(), customize: vi.fn(), colors: {} }
     expect(mount(CookieConsentBanner).find('.cc-banner').exists()).toBe(false)

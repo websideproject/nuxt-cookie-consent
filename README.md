@@ -21,6 +21,7 @@ to gate scripts and cookies behind each category.
 - **Banner only when needed** — it appears on the first visit only if a configured category requires it
 - **Cookies and cookieless tracking** — `kind: 'cookie'` categories list provider and duration; `kind: 'tracking'` ones (e.g. cookieless analytics) are a plain toggle, opt-out by default
 - **Just-in-time consent** — `useRequestConsent` asks for one category at the moment a feature needs it
+- **Preferences without a banner** — a theme or language switch asks for consent the first time it is used; until then no cookie is set and no banner is needed
 - **Consent-gated cookies and scripts** — `useConsentCookie` writes only after consent; `$consent.triggers.<category>` loads a script through [Nuxt Scripts](https://scripts.nuxt.com) once granted
 - **No UI framework required** — the default components are plain CSS themed from your `colors`; override any of them with a same-named component in your own UI kit
 - **Headless** — use `$consent` and the composables as the consent store and render your own UI, or none
@@ -94,6 +95,26 @@ async function toggleTheme() {
 
 Configuration, the full `$consent` API, custom components and headless use are in the
 [module README](./packages/cookie-consent/README.md) and the documentation.
+
+## 📸 Screenshots
+
+The repo's playground renders the built-in components; the pictures are its CI screenshots.
+
+**[The banner](https://websideproject.com/docs/nuxt-cookie-consent/guide/components)** — shown on a first visit only when a category needs consent:
+
+![The consent banner at the bottom of the page, with Customize and Accept All](https://raw.githubusercontent.com/websideproject/nuxt-cookie-consent/main/apps/docs/public/screenshots/banner-1440.png)
+
+**[The settings modal](https://websideproject.com/docs/nuxt-cookie-consent/guide/configuration)** — cookie categories with their provider/duration table, cookieless tracking as a toggle:
+
+![The settings modal with Necessary, Preference and Analytics cookie categories and a cookieless Usage Statistics toggle](https://raw.githubusercontent.com/websideproject/nuxt-cookie-consent/main/apps/docs/public/screenshots/modal-1440.png)
+
+**[Just-in-time consent](https://websideproject.com/docs/nuxt-cookie-consent/guide/composables)** — `useRequestConsent` opens the modal with the reason on top:
+
+![The settings modal opened for Preference Cookies, with the reason shown above the categories](https://raw.githubusercontent.com/websideproject/nuxt-cookie-consent/main/apps/docs/public/screenshots/modal-request-1440.png)
+
+**[Dark mode](https://websideproject.com/docs/nuxt-cookie-consent/guide/components#styling)** — `darkColors` under a `.dark` ancestor, as Nuxt's color mode sets it:
+
+![The settings modal in dark mode](https://raw.githubusercontent.com/websideproject/nuxt-cookie-consent/main/apps/docs/public/screenshots/modal-dark-1440.png)
 
 ## 📖 Documentation
 

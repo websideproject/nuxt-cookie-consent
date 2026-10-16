@@ -45,6 +45,11 @@ The module shows the initial consent banner *only if necessary*, controlled by t
 
 If **all** non-essential cookies set `requiresBanner: false`, no banner shows on first visit — only the floating settings button appears.
 
+This is how a theme or language preference works without a banner: nothing is stored on the first visit; when the
+visitor first switches the theme or the language, `useRequestConsent('preferences')` opens the modal, and the cookie
+is written only on a yes (the language can still change for the visit on a no — only remembering it needs the
+cookie). See [Preferences without a banner](https://websideproject.com/docs/nuxt-cookie-consent/guide/usage#preferences-without-a-banner-theme-language).
+
 ### Cookie vs cookieless tracking categories (`kind`)
 
 A category declares what it represents:
@@ -62,13 +67,24 @@ categories: {
 }
 ```
 
-Category-level fields: `kind?`, `description?`, `requiresBanner?` (the last overrides the per-cookie heuristic for `cookie` categories too), `defaultEnabled?`.
+Category-level fields: `kind?`, `description?` (a string, or one per locale), `requiresBanner?` (the last overrides the per-cookie heuristic for `cookie` categories too), `defaultEnabled?`.
 
 ### Default state (`defaultEnabled`)
 
 Before a visitor chooses, `necessary` is on, a `kind: 'tracking'` category **without** a banner is **on** (that is
 the opt-out), and everything else is off. `defaultEnabled` overrides it per category — `defaultEnabled: false` on a
 tracking category gives an **opt-in without a banner** (e.g. session replays: off until switched on from the FAB).
+
+### Dark mode (`darkColors`)
+
+The default components switch to `darkColors` under a `.dark` ancestor — the class Nuxt's color mode (and Nuxt UI)
+puts on `<html>`. The default is a dark neutral palette; set your own, or `darkColors: false` to keep `colors` in
+both modes.
+
+### Translated providers and durations
+
+A cookie's `provider` and `duration` (and a category's `description`) are a string, or one per locale:
+`duration: { en: '1 year', de: '1 Jahr' }`. Custom components render them with `useConsentLocalized(value)`.
 
 ### Consent cookie name (`cookieName`)
 
@@ -204,6 +220,7 @@ async function toggleTheme() {
 | `useRequestConsent(category)` | Ask for consent just-in-time; resolves to a boolean. |
 | `useConsentCookie(name, category, options)` | A `useCookie`-like ref that only persists once the category is consented. |
 | `useConsentText(key, replacements?)` | Resolve a localized text into renderable string/link parts. |
+| `useConsentLocalized(value)` | A `provider` / `duration` / `description` config value in the active locale. |
 | `useConsentBanner()` / `useConsentModal()` / `useConsentFab()` | State/handlers backing the built-in components (useful when building custom UI). |
 
 ## Overriding components
@@ -242,6 +259,26 @@ export default defineNuxtPlugin(() => {
 ```
 
 > **`triggers` caveat:** a trigger resolves once on grant and is **not** reset on revoke — it's ideal for `watch(state)` gating (above) and for `useScript({ trigger })` load-on-consent, but `useScript` won't *unload* a script when consent is later revoked. Use an in-memory kill-switch on the tracker (as above) when you need revoke-to-stop.
+
+## Screenshots
+
+The repo's playground renders the built-in components; the pictures are its CI screenshots.
+
+**[The banner](https://websideproject.com/docs/nuxt-cookie-consent/guide/components)** — shown on a first visit only when a category needs consent:
+
+![The consent banner at the bottom of the page, with Customize and Accept All](https://raw.githubusercontent.com/websideproject/nuxt-cookie-consent/main/apps/docs/public/screenshots/banner-1440.png)
+
+**[The settings modal](https://websideproject.com/docs/nuxt-cookie-consent/guide/configuration)** — cookie categories with their provider/duration table, cookieless tracking as a toggle:
+
+![The settings modal with Necessary, Preference and Analytics cookie categories and a cookieless Usage Statistics toggle](https://raw.githubusercontent.com/websideproject/nuxt-cookie-consent/main/apps/docs/public/screenshots/modal-1440.png)
+
+**[Just-in-time consent](https://websideproject.com/docs/nuxt-cookie-consent/guide/composables)** — `useRequestConsent` opens the modal with the reason on top:
+
+![The settings modal opened for Preference Cookies, with the reason shown above the categories](https://raw.githubusercontent.com/websideproject/nuxt-cookie-consent/main/apps/docs/public/screenshots/modal-request-1440.png)
+
+**[Dark mode](https://websideproject.com/docs/nuxt-cookie-consent/guide/components#styling)** — `darkColors` under a `.dark` ancestor, as Nuxt's color mode sets it:
+
+![The settings modal in dark mode](https://raw.githubusercontent.com/websideproject/nuxt-cookie-consent/main/apps/docs/public/screenshots/modal-dark-1440.png)
 
 ## Documentation
 

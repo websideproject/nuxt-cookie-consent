@@ -1,21 +1,14 @@
 <script setup lang="ts">
 import { computed } from '#imports'
 import { useConsentBanner } from '../composables/useConsentBanner'
+import { consentColorVars } from '../css-vars'
 import { useConsentText } from '../composables/useConsentText'
 
 // Pure-CSS, dependency-free default (P12.M2). Themeable via the `colors` config (CSS variables); the
 // consuming app can override this component by name (e.g. with @nuxt/ui) — see P12.I4.
-const { isVisible, acceptAll, customize, colors } = useConsentBanner()
+const { isVisible, acceptAll, customize, colors, darkColors } = useConsentBanner()
 
-const cssVars = computed(() => ({
-  '--cc-bg': colors.background ?? 'hsl(0 0% 100%)',
-  '--cc-fg': colors.foreground ?? 'hsl(240 10% 3.9%)',
-  '--cc-primary': colors.primary ?? 'hsl(240 5.9% 10%)',
-  '--cc-primary-fg': colors.primaryForeground ?? 'hsl(0 0% 98%)',
-  '--cc-secondary': colors.secondary ?? 'hsl(240 4.8% 95.9%)',
-  '--cc-secondary-fg': colors.secondaryForeground ?? 'hsl(240 5.9% 10%)',
-  '--cc-border': colors.border ?? 'hsl(240 5.9% 90%)',
-}))
+const cssVars = computed(() => consentColorVars(colors, darkColors))
 </script>
 
 <template>
@@ -63,6 +56,25 @@ const cssVars = computed(() => ({
 </template>
 
 <style scoped>
+/* light or dark set of the inline colour variables (consentColorVars) */
+.cc-banner {
+  --cc-bg: var(--cc-bg-light);
+  --cc-fg: var(--cc-fg-light);
+  --cc-primary: var(--cc-primary-light);
+  --cc-primary-fg: var(--cc-primary-fg-light);
+  --cc-secondary: var(--cc-secondary-light);
+  --cc-secondary-fg: var(--cc-secondary-fg-light);
+  --cc-border: var(--cc-border-light);
+}
+.dark .cc-banner {
+  --cc-bg: var(--cc-bg-dark);
+  --cc-fg: var(--cc-fg-dark);
+  --cc-primary: var(--cc-primary-dark);
+  --cc-primary-fg: var(--cc-primary-fg-dark);
+  --cc-secondary: var(--cc-secondary-dark);
+  --cc-secondary-fg: var(--cc-secondary-fg-dark);
+  --cc-border: var(--cc-border-dark);
+}
 .cc-banner {
   position: fixed;
   bottom: 0;
@@ -93,6 +105,8 @@ const cssVars = computed(() => ({
 }
 .cc-banner__link {
   color: inherit;
+  /* set explicitly: a CSS reset (e.g. Tailwind's preflight, under Nuxt UI) removes the underline from links */
+  text-decoration: underline;
   text-underline-offset: 2px;
 }
 .cc-banner__actions {

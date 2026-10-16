@@ -7,6 +7,11 @@ export interface ModuleOptions {
   locale?: string
   fallbackLocale?: string
   colors?: Partial<ColorOptions>
+  /**
+   * The colours the built-in components use under a `.dark` ancestor (the class Nuxt's color mode sets on <html>).
+   * `false` keeps `colors` in dark mode too.
+   */
+  darkColors?: Partial<ColorOptions> | false
   texts?: Partial<Record<string, unknown>>
   linkMap?: Record<string, string>
   categories: Record<string, CategoryOptions>
@@ -35,6 +40,16 @@ export default defineNuxtModule<ModuleOptions>({
       secondaryForeground: 'hsl(240 5.9% 10%)',
       border: 'hsl(240 5.9% 90%)',
       borderInput: 'hsl(240 5.9% 90%)',
+    },
+    darkColors: {
+      background: 'hsl(240 10% 3.9%)',
+      foreground: 'hsl(0 0% 98%)',
+      primary: 'hsl(0 0% 98%)',
+      primaryForeground: 'hsl(240 5.9% 10%)',
+      secondary: 'hsl(240 3.7% 15.9%)',
+      secondaryForeground: 'hsl(0 0% 98%)',
+      border: 'hsl(240 3.7% 15.9%)',
+      borderInput: 'hsl(240 3.7% 15.9%)',
     },
     texts: defaultTexts,
     linkMap: {
@@ -87,6 +102,7 @@ export default defineNuxtModule<ModuleOptions>({
       fallbackLocale: options.fallbackLocale,
       cookieName: options.cookieName || 'cookie_consent',
       colors: options.colors,
+      darkColors: options.darkColors,
       texts: finalTexts,
       linkMap: finalLinkMap,
       categories: finalCategories,

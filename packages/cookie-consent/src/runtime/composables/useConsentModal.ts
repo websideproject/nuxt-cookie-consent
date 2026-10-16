@@ -61,6 +61,7 @@ export function useConsentModal() {
   return {
     isOpen: $consent.isModalOpen,
     colors: config.colors,
+    darkColors: config.darkColors,
     categories,
     localConsentState,
     openAccordions,
