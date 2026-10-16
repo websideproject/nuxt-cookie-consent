@@ -1,6 +1,6 @@
 {
   "name": "@websideproject/nuxt-cookie-consent",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "GDPR cookie and cookieless-tracking consent for Nuxt 4: banner, floating button, preferences modal, consent-gated scripts and cookies",
   "repository": {
     "type": "git",
