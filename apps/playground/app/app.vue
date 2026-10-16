@@ -1,18 +1,21 @@
 <script setup lang="ts">
+useHead({
+  link: [{ rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' }],
+  htmlAttrs: { lang: 'en' },
+})
+useSeoMeta({
+  title: 'Nuxt Cookie Consent playground',
+  description: 'The built-in consent banner, settings modal and floating button of @websideproject/nuxt-cookie-consent, with just-in-time consent and consent-gated scripts and cookies.',
+})
+
 // The cookie-consent module auto-provides $consent and auto-imports its composables.
 const { $consent } = useNuxtApp()
 
-// A preference cookie — only persisted once the user consents to "preferences".
-const theme = useConsentCookie<'light' | 'dark'>('theme_preference', 'preferences', {
-  default: () => 'light',
-})
+// The language works without consent, but is only remembered (written to its cookie) once "preferences" is granted.
+const locale = useConsentCookie<'en' | 'de'>('locale_preference', 'preferences', { default: () => 'en' })
+watch(locale, value => $consent.setLocale(value ?? 'en'), { immediate: true })
 
-async function toggleTheme() {
-  const granted = await useRequestConsent('preferences')
-  if (granted) {
-    theme.value = theme.value === 'light' ? 'dark' : 'light'
-  }
-}
+const { toggle: toggleColorMode } = useColorModeToggle()
 
 // Consent-gated script: Nuxt Scripts only injects it once the `analytics` trigger resolves (on consent).
 const analyticsLoaded = ref(false)
@@ -22,88 +25,173 @@ onMounted(() => {
   window.addEventListener('analytics-demo-loaded', () => { analyticsLoaded.value = true })
 })
 
+const analyticsAnswer = ref<boolean | null>(null)
 async function requestAnalytics() {
-  const granted = await useRequestConsent('analytics')
-  alert(granted ? 'Analytics consent granted — load your scripts now.' : 'Analytics consent declined.')
+  analyticsAnswer.value = await useRequestConsent('analytics')
 }
 </script>
 
 <template>
-  <div :class="['page', theme]">
-    <main class="container">
-      <h1>nuxt-cookie-consent playground</h1>
-      <p class="muted">
-        A minimal demo of <code>@websideproject/nuxt-cookie-consent</code>. The banner / modal / fab below are
-        dependency-free overrides living in <code>app/components/</code>.
-      </p>
-
-      <section class="card">
-        <h2>Consent state</h2>
-        <ul>
-          <li
-            v-for="(value, key) in $consent.state.value"
-            :key="key"
-          >
-            <strong>{{ key }}</strong>: {{ value ? '✅ granted' : '❌ denied' }}
-          </li>
-        </ul>
-        <p class="muted">
-          Choice made: {{ $consent.hasMadeChoice.value ? 'yes' : 'no' }} · Locale: {{ $consent.currentLocale.value }}
-        </p>
-      </section>
-
-      <section class="card">
-        <h2>Just-in-time consent</h2>
-        <div class="row">
-          <button @click="toggleTheme">
-            Toggle theme (needs <em>preferences</em>) — current: {{ theme }}
-          </button>
-          <button @click="requestAnalytics">
-            Enable analytics (needs <em>analytics</em>)
-          </button>
-        </div>
-        <p
-          class="muted"
-          data-testid="analytics-script"
+  <UApp>
+    <UHeader :toggle="false">
+      <template #left>
+        <NuxtLink
+          to="/"
+          aria-label="Nuxt Cookie Consent playground"
         >
-          Analytics script (<code>useScript</code> + <code>$consent.triggers.analytics</code>):
-          {{ analyticsLoaded ? 'loaded' : 'waiting for consent' }}
-        </p>
-      </section>
+          <AppLogo />
+        </NuxtLink>
+      </template>
 
-      <section class="card">
-        <h2>Controls</h2>
-        <div class="row">
-          <button @click="$consent.isModalOpen.value = true">
-            Open settings modal
-          </button>
-          <button @click="$consent.setLocale($consent.currentLocale.value === 'en' ? 'de' : 'en')">
-            Switch locale (EN/DE)
-          </button>
+      <template #right>
+        <ThemeButton />
+        <UButton
+          to="https://github.com/websideproject/nuxt-cookie-consent"
+          target="_blank"
+          icon="i-simple-icons-github"
+          aria-label="GitHub"
+          color="neutral"
+          variant="ghost"
+        />
+      </template>
+    </UHeader>
+
+    <UMain class="flex-1 min-h-auto">
+      <UContainer class="max-w-3xl py-10 sm:py-14">
+        <h1 class="text-3xl font-bold text-highlighted">
+          Cookie consent for Nuxt
+        </h1>
+        <p class="mt-2 text-muted">
+          The module's built-in banner, settings modal and floating button — plain CSS, no UI framework — on a
+          Nuxt UI page. Same-named overrides, for an app that brings its own UI, are in
+          <code class="text-sm">examples/overrides/</code>.
+        </p>
+
+        <div class="mt-8 space-y-6">
+          <UCard>
+            <template #header>
+              <h2 class="font-semibold text-highlighted">
+                Consent state
+              </h2>
+            </template>
+            <ul class="space-y-2">
+              <li
+                v-for="(value, key) in $consent.state.value"
+                :key="key"
+                class="flex items-center justify-between gap-4"
+              >
+                <code class="text-sm">{{ key }}</code>
+                <UBadge
+                  :color="value ? 'success' : 'neutral'"
+                  variant="subtle"
+                  :icon="value ? 'i-lucide-check' : 'i-lucide-x'"
+                  :label="value ? 'granted' : 'denied'"
+                />
+              </li>
+            </ul>
+            <template #footer>
+              <p class="text-sm text-muted">
+                Choice made: {{ $consent.hasMadeChoice.value ? 'yes' : 'no' }} · Locale: {{ $consent.currentLocale.value }}
+              </p>
+            </template>
+          </UCard>
+
+          <UCard>
+            <template #header>
+              <h2 class="font-semibold text-highlighted">
+                Just-in-time consent
+              </h2>
+            </template>
+            <div class="flex flex-wrap gap-3">
+              <UButton
+                color="neutral"
+                variant="outline"
+                icon="i-lucide-sun-moon"
+                label="Switch colour mode (needs preferences)"
+                @click="toggleColorMode"
+              />
+              <UButton
+                color="neutral"
+                variant="outline"
+                icon="i-lucide-chart-line"
+                label="Enable analytics (needs analytics)"
+                @click="requestAnalytics"
+              />
+            </div>
+            <p
+              v-if="analyticsAnswer !== null"
+              class="mt-3 text-sm text-muted"
+            >
+              {{ analyticsAnswer ? 'Analytics consent granted.' : 'Analytics consent declined.' }}
+            </p>
+            <template #footer>
+              <p
+                class="text-sm text-muted"
+                data-testid="analytics-script"
+              >
+                Analytics script (<code>useScript</code> + <code>$consent.triggers.analytics</code>):
+                {{ analyticsLoaded ? 'loaded' : 'waiting for consent' }}
+              </p>
+            </template>
+          </UCard>
+
+          <UCard>
+            <template #header>
+              <h2 class="font-semibold text-highlighted">
+                Controls
+              </h2>
+            </template>
+            <div class="flex flex-wrap gap-3">
+              <UButton
+                color="neutral"
+                variant="outline"
+                icon="i-lucide-settings-2"
+                label="Open settings modal"
+                @click="$consent.isModalOpen.value = true"
+              />
+              <UButton
+                color="neutral"
+                variant="outline"
+                icon="i-lucide-languages"
+                label="Switch language (EN/DE)"
+                @click="locale = locale === 'en' ? 'de' : 'en'"
+              />
+            </div>
+            <template #footer>
+              <p class="text-sm text-muted">
+                The language is remembered (<code>useConsentCookie</code>) only once <em>preferences</em> is granted.
+              </p>
+            </template>
+          </UCard>
         </div>
-      </section>
-    </main>
+      </UContainer>
+    </UMain>
+
+    <USeparator>
+      <ProductLogo class="size-6" />
+    </USeparator>
+
+    <UFooter>
+      <template #left>
+        <p class="text-sm text-muted">
+          Nuxt Cookie Consent playground · by <ColourfulText class="font-semibold" />
+        </p>
+      </template>
+
+      <template #right>
+        <UButton
+          to="https://github.com/websideproject/nuxt-cookie-consent"
+          target="_blank"
+          icon="i-simple-icons-github"
+          aria-label="GitHub"
+          color="neutral"
+          variant="ghost"
+        />
+      </template>
+    </UFooter>
 
     <CookieConsentBanner />
     <CookieConsentModal />
     <CookieConsentFab />
-  </div>
+  </UApp>
 </template>
-
-<style>
-* { box-sizing: border-box; }
-body { margin: 0; font-family: system-ui, sans-serif; }
-.page { min-height: 100vh; }
-.page.light { background: #fff; color: #18181b; }
-.page.dark { background: #18181b; color: #fafafa; }
-.container { max-width: 720px; margin: 0 auto; padding: 3rem 1.5rem 6rem; }
-h1 { margin-bottom: .25rem; }
-.muted { opacity: .65; font-size: .9rem; }
-code { background: rgba(127,127,127,.18); padding: .1em .35em; border-radius: 4px; }
-.card { border: 1px solid rgba(127,127,127,.3); border-radius: 12px; padding: 1.25rem; margin-top: 1.5rem; }
-.card h2 { margin-top: 0; font-size: 1.05rem; }
-.row { display: flex; flex-wrap: wrap; gap: .75rem; }
-button { cursor: pointer; border: 1px solid rgba(127,127,127,.4); background: transparent; color: inherit; padding: .5rem .9rem; border-radius: 8px; font-size: .9rem; }
-button:hover { background: rgba(127,127,127,.12); }
-ul { padding-left: 1.1rem; }
-</style>

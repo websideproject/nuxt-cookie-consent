@@ -37,3 +37,7 @@ logs
 apps/web/.data
 apps/chat/.data
 packages/cookie-consent/coverage
+
+# Screenshot suite output
+test-results
+playwright-report

@@ -82,8 +82,8 @@ const {
                 :key="cookie.id"
               >
                 <td><code>{{ cookie.id }}</code></td>
-                <td>{{ cookie.provider }}</td>
-                <td>{{ cookie.duration }}</td>
+                <td>{{ useConsentLocalized(cookie.provider) }}</td>
+                <td>{{ useConsentLocalized(cookie.duration) }}</td>
               </tr>
             </tbody>
           </table>

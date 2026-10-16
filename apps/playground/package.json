@@ -10,17 +10,24 @@
     "preview": "nuxt preview",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "typecheck": "nuxt typecheck"
+    "typecheck": "nuxt typecheck",
+    "build:visual": "bun run --filter @websideproject/nuxt-cookie-consent build && nuxt build",
+    "preview:visual": "TZ=UTC PORT=3100 node .output/server/index.mjs",
+    "test:visual": "playwright test",
+    "visual:baseline": "bash scripts/visual-baseline.sh"
   },
   "dependencies": {
+    "@iconify-json/lucide": "^1.2.145",
+    "@iconify-json/simple-icons": "^1.2.100",
     "@nuxt/scripts": "^1.3.12",
+    "@nuxt/ui": "^4.12.0",
     "@websideproject/nuxt-cookie-consent": "workspace:*",
     "nuxt": "^4.4.2"
   },
   "devDependencies": {
-    "@tailwindcss/vite": "^4.1.11",
+    "@playwright/test": "1.60.0",
     "@types/node": "^22.0.0",
-    "tailwindcss": "^4.1.11",
+    "tailwindcss": "^4.3.3",
     "vue-tsc": "^3.2.8"
   }
 }
