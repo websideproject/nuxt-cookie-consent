@@ -117,6 +117,8 @@ jobs:
           bun-version: latest
       - name: Use the Nuxt 5 nightly
         # `5x` is a dist-tag; bun reads it as a version range inside an npm: alias, so resolve it with npm first.
+        # @nuxt/kit is also a root devDependency here: @nuxt/scripts imports it without declaring it, and finds it only
+        # through the root node_modules, which the override alone leaves without an `@nuxt/kit`.
         run: |
           V=$(npm view nuxt-nightly@5x version)
           echo "Nuxt 5 nightly: $V"
@@ -128,6 +130,7 @@ jobs:
               '@nuxt/kit': 'npm:@nuxt/kit-nightly@$V',
               '@nuxt/schema': 'npm:@nuxt/schema-nightly@$V',
             }
+            pkg.devDependencies = { ...pkg.devDependencies, '@nuxt/kit': 'npm:@nuxt/kit-nightly@$V' }
             fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2))
           "
           bun install
