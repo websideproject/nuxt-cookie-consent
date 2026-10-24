@@ -6,7 +6,18 @@ import { defineConfig } from 'vitest/config'
 // `#imports` is a Nuxt build-only virtual module; alias it to a stub so vite can resolve the SFC's
 // imports (the logic tests still `vi.mock('#imports', …)` to override it per-file).
 export default defineConfig({
-  plugins: [vue()],
+  plugins: [
+    vue(),
+    // The tests run the browser side of the runtime (happy-dom). Nuxt replaces these flags at build time; vite's
+    // `define` does not reach `import.meta.*` here, so substitute them in the runtime sources.
+    {
+      name: 'nuxt-import-meta-flags',
+      transform(code, id) {
+        if (!id.includes('/src/runtime/')) return
+        return code.replaceAll('import.meta.client', 'true').replaceAll('import.meta.server', 'false')
+      },
+    },
+  ],
   resolve: {
     alias: {
       '#imports': fileURLToPath(new URL('./test/helpers/imports-stub.ts', import.meta.url)),

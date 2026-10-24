@@ -15,6 +15,7 @@ const {
   localConsentState,
   contextualMessage,
   acceptAll,
+  rejectAll,
   saveSelection,
   closeModal,
   colors,
@@ -140,14 +141,21 @@ function isCookieKind(cat: CategoryOptions): boolean {
         <footer class="cc-dialog__footer">
           <button
             type="button"
-            class="cc-btn cc-btn--outline"
+            class="cc-btn cc-btn--outline cc-btn--save"
             @click="saveSelection"
           >
             {{ useConsentText('acceptSelectionBtn')[0].content }}
           </button>
           <button
             type="button"
-            class="cc-btn cc-btn--primary"
+            class="cc-btn cc-btn--primary cc-btn--reject"
+            @click="rejectAll"
+          >
+            {{ useConsentText('rejectAllBtn')[0].content }}
+          </button>
+          <button
+            type="button"
+            class="cc-btn cc-btn--primary cc-btn--accept"
             @click="acceptAll"
           >
             {{ useConsentText('acceptAllBtn')[0].content }}
@@ -307,10 +315,12 @@ function isCookieKind(cat: CategoryOptions): boolean {
 .cc-dialog__footer {
   padding: 1rem 1.25rem;
   border-top: 1px solid var(--cc-border);
-  display: flex;
+  /* bottom sheet: save on its own row, reject and accept side by side below it */
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 0.5rem;
-  justify-content: flex-end;
 }
+.cc-dialog__footer .cc-btn--save { grid-column: 1 / -1; }
 .cc-btn {
   font: inherit;
   font-size: 0.875rem;
@@ -333,5 +343,6 @@ function isCookieKind(cat: CategoryOptions): boolean {
     border-radius: 1rem;
     max-height: 90vh;
   }
+  .cc-dialog__footer { display: flex; justify-content: flex-end; }
 }
 </style>

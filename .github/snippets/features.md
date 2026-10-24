@@ -1,5 +1,10 @@
 - **Banner only when needed** — it appears on the first visit only if a configured category requires it
 - **Cookies and cookieless tracking** — `kind: 'cookie'` categories list provider and duration; `kind: 'tracking'` ones (e.g. cookieless analytics) are a plain toggle, opt-out by default
+- **Reject as easily as accept** — Reject All sits beside Accept All in the banner and the modal
+- **Asks again when it should** — when your `consentVersion` changes, or the choice is older than `expiresInDays`
+- **Withdrawal that takes effect** — the category's cookies are deleted, and the page reloads if its scripts ran
+- **Events** — `consent:changed`, `consent:granted` and `consent:revoked` Nuxt runtime hooks
+- **Google Consent Mode v2** — `default` and `update` commands from your categories
 - **Just-in-time consent** — `useRequestConsent` asks for one category at the moment a feature needs it
 - **Preferences without a banner** — a theme or language switch asks for consent the first time it is used; until then no cookie is set and no banner is needed
 - **Consent-gated cookies and scripts** — `useConsentCookie` writes only after consent; `$consent.triggers.<category>` loads a script through [Nuxt Scripts](https://scripts.nuxt.com) once granted

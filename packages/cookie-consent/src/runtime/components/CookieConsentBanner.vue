@@ -6,7 +6,7 @@ import { useConsentText } from '../composables/useConsentText'
 
 // Pure-CSS, dependency-free default (P12.M2). Themeable via the `colors` config (CSS variables); the
 // consuming app can override this component by name (e.g. with @nuxt/ui) — see P12.I4.
-const { isVisible, acceptAll, customize, colors, darkColors } = useConsentBanner()
+const { isVisible, acceptAll, rejectAll, customize, colors, darkColors } = useConsentBanner()
 
 const cssVars = computed(() => consentColorVars(colors, darkColors))
 </script>
@@ -43,9 +43,17 @@ const cssVars = computed(() => consentColorVars(colors, darkColors))
         >
           {{ useConsentText('customizeBtn')[0].content }}
         </button>
+        <!-- rejecting is offered as prominently as accepting -->
         <button
           type="button"
-          class="cc-btn cc-btn--primary"
+          class="cc-btn cc-btn--primary cc-btn--reject"
+          @click="rejectAll"
+        >
+          {{ useConsentText('rejectAllBtn')[0].content }}
+        </button>
+        <button
+          type="button"
+          class="cc-btn cc-btn--primary cc-btn--accept"
           @click="acceptAll"
         >
           {{ useConsentText('acceptAllBtn')[0].content }}
@@ -111,6 +119,8 @@ const cssVars = computed(() => consentColorVars(colors, darkColors))
 }
 .cc-banner__actions {
   display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
   gap: 0.5rem;
   flex-shrink: 0;
 }

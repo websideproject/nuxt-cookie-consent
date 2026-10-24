@@ -86,6 +86,48 @@ both modes.
 A cookie's `provider` and `duration` (and a category's `description`) are a string, or one per locale:
 `duration: { en: '1 year', de: '1 Jahr' }`. Custom components render them with `useConsentLocalized(value)`.
 
+### Reject All
+
+The banner and the modal offer **Reject All** beside **Accept All**, styled the same, so refusing is as easy as
+accepting. It withdraws every category that is not `readonly`, opt-out tracking included. Overrides get it as
+`rejectAll` from `useConsentBanner()` / `useConsentModal()`, and the text as `rejectAllBtn`.
+
+### Asking again (`consentVersion`, `expiresInDays`)
+
+A choice is stored with the policy version and the time it was made (in `cookie_consent_meta`). The visitor is asked
+again when `consentVersion` changes, or when the choice is older than `expiresInDays` (default `365`). Setting
+`consentVersion` for the first time asks everyone once.
+
+```ts
+cookieConsent: { consentVersion: '2026-10', expiresInDays: 180 }
+```
+
+### Withdrawing consent (`reloadOnRevoke`)
+
+When a category is switched off, the `consent:revoked` hook runs, the category's declared `cookies` are deleted (an
+`id` ending in `*` matches by prefix, e.g. `_ga_*`), and — if the category was granted on the current page — the page
+reloads, since a script that already ran cannot be unloaded. Set `reloadOnRevoke: false` on the module or on a category
+when your `consent:revoked` listener stops everything itself. HttpOnly cookies and cookies on a path other than `/`
+are out of the browser's reach.
+
+### Google Consent Mode (`googleConsentMode`)
+
+Map categories to Consent Mode v2 types; the module sends `default` from the page head and an `update` on every load
+and change, into `window.dataLayer`:
+
+```ts
+cookieConsent: {
+  googleConsentMode: {
+    mapping: {
+      analytics: 'analytics_storage',
+      marketing: ['ad_storage', 'ad_user_data', 'ad_personalization'],
+    },
+  },
+}
+```
+
+A type is `granted` only while every category mapped to it is granted; unmapped types are `denied`.
+
 ### Consent cookie name (`cookieName`)
 
 The decision is stored in a cookie named `cookie_consent` by default; set `cookieConsent.cookieName` to rename it
@@ -243,6 +285,8 @@ const { $consent } = useNuxtApp()
 // Persisted choice made?    $consent.hasMadeChoice.value
 // Open your own settings:   $consent.isModalOpen.value = true
 // Update + persist:         $consent.updateState({ ...$consent.state.value, analytics: true })
+// Accept / reject all:      $consent.acceptAll() / $consent.rejectAll()
+// When the choice was made: $consent.consentedAt.value               // ms, null before a choice
 // Per-category trigger:     $consent.triggers.analytics           // Promise resolved on grant
 // Locale:                   $consent.setLocale('de')
 ```
@@ -258,7 +302,22 @@ export default defineNuxtPlugin(() => {
 })
 ```
 
-> **`triggers` caveat:** a trigger resolves once on grant and is **not** reset on revoke — it's ideal for `watch(state)` gating (above) and for `useScript({ trigger })` load-on-consent, but `useScript` won't *unload* a script when consent is later revoked. Use an in-memory kill-switch on the tracker (as above) when you need revoke-to-stop.
+> **`triggers` caveat:** a trigger resolves once on grant and is **not** reset on revoke. A script loaded with `useScript({ trigger })` cannot be unloaded, which is why withdrawing a category reloads the page by default (`reloadOnRevoke`).
+
+### Events
+
+Every commit calls Nuxt runtime hooks, in the browser:
+
+```ts
+// app/plugins/consent-events.client.ts
+export default defineNuxtPlugin((nuxtApp) => {
+  // { state, previous, granted, revoked, action: 'acceptAll' | 'rejectAll' | 'save' }
+  nuxtApp.hook('consent:changed', event => console.log(event))
+  nuxtApp.hook('consent:granted', category => console.log('on', category))
+  // runs before the category's cookies are deleted and the page reloads
+  nuxtApp.hook('consent:revoked', category => myTracker.stop())
+})
+```
 
 ## Screenshots
 
@@ -266,7 +325,7 @@ The repo's playground renders the built-in components; the pictures are its CI s
 
 **[The banner](https://websideproject.com/docs/nuxt-cookie-consent/guide/components)** — shown on a first visit only when a category needs consent:
 
-![The consent banner at the bottom of the page, with Customize and Accept All](https://raw.githubusercontent.com/websideproject/nuxt-cookie-consent/main/apps/docs/public/screenshots/banner-1440.png)
+![The consent banner at the bottom of the page, with Customize, Reject All and Accept All](https://raw.githubusercontent.com/websideproject/nuxt-cookie-consent/main/apps/docs/public/screenshots/banner-1440.png)
 
 **[The settings modal](https://websideproject.com/docs/nuxt-cookie-consent/guide/configuration)** — cookie categories with their provider/duration table, cookieless tracking as a toggle:
 

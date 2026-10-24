@@ -17,9 +17,14 @@ export function useConsentBanner() {
    * Accepts all cookie categories and closes the banner.
    */
   function acceptAll() {
-    const allConsents: Record<string, boolean> = {}
-    Object.keys($consent.state.value).forEach(key => (allConsents[key] = true))
-    $consent.updateState(allConsents)
+    return $consent.acceptAll()
+  }
+
+  /**
+   * Rejects every category that is not required and closes the banner.
+   */
+  function rejectAll() {
+    return $consent.rejectAll()
   }
 
   /**
@@ -32,6 +37,7 @@ export function useConsentBanner() {
   return {
     isVisible,
     acceptAll,
+    rejectAll,
     customize,
     colors,
     darkColors,

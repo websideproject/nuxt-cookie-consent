@@ -20,6 +20,11 @@ to gate scripts and cookies behind each category.
 
 - **Banner only when needed** — it appears on the first visit only if a configured category requires it
 - **Cookies and cookieless tracking** — `kind: 'cookie'` categories list provider and duration; `kind: 'tracking'` ones (e.g. cookieless analytics) are a plain toggle, opt-out by default
+- **Reject as easily as accept** — Reject All sits beside Accept All in the banner and the modal
+- **Asks again when it should** — when your `consentVersion` changes, or the choice is older than `expiresInDays`
+- **Withdrawal that takes effect** — the category's cookies are deleted, and the page reloads if its scripts ran
+- **Events** — `consent:changed`, `consent:granted` and `consent:revoked` Nuxt runtime hooks
+- **Google Consent Mode v2** — `default` and `update` commands from your categories
 - **Just-in-time consent** — `useRequestConsent` asks for one category at the moment a feature needs it
 - **Preferences without a banner** — a theme or language switch asks for consent the first time it is used; until then no cookie is set and no banner is needed
 - **Consent-gated cookies and scripts** — `useConsentCookie` writes only after consent; `$consent.triggers.<category>` loads a script through [Nuxt Scripts](https://scripts.nuxt.com) once granted
@@ -102,7 +107,7 @@ The repo's playground renders the built-in components; the pictures are its CI s
 
 **[The banner](https://websideproject.com/docs/nuxt-cookie-consent/guide/components)** — shown on a first visit only when a category needs consent:
 
-![The consent banner at the bottom of the page, with Customize and Accept All](https://raw.githubusercontent.com/websideproject/nuxt-cookie-consent/main/apps/docs/public/screenshots/banner-1440.png)
+![The consent banner at the bottom of the page, with Customize, Reject All and Accept All](https://raw.githubusercontent.com/websideproject/nuxt-cookie-consent/main/apps/docs/public/screenshots/banner-1440.png)
 
 **[The settings modal](https://websideproject.com/docs/nuxt-cookie-consent/guide/configuration)** — cookie categories with their provider/duration table, cookieless tracking as a toggle:
 
@@ -180,24 +185,29 @@ bun run test
 | File | Stmts | Branch | Funcs | Lines |
 |------|------:|-------:|------:|------:|
 | **components** | | | | |
-| CookieConsentBanner.vue | 100% | 96% | 100% | 100% |
+| CookieConsentBanner.vue | 100% | 93.33% | 100% | 100% |
 | CookieConsentFab.vue | 100% | 100% | 100% | 100% |
-| CookieConsentModal.vue | 91.3% | 84.09% | 66.66% | 90.9% |
+| CookieConsentModal.vue | 95.83% | 88.23% | 76.92% | 95.65% |
 | **composables** | | | | |
 | useConsentBanner.ts | 100% | 100% | 100% | 100% |
-| useConsentCookie.ts | 0% | 0% | 0% | 0% |
+| useConsentCookie.ts | 86.36% | 73.68% | 85.71% | 85.71% |
 | useConsentFab.ts | 100% | 100% | 100% | 100% |
-| useConsentModal.ts | 71.42% | 25% | 66.66% | 72% |
-| useConsentText.ts | 93.33% | 77.77% | 100% | 93.1% |
+| useConsentLocalized.ts | 0% | 100% | 0% | 0% |
+| useConsentModal.ts | 70% | 25% | 55.55% | 75% |
+| useConsentText.ts | 93.33% | 75% | 100% | 93.1% |
 | useRequestConsent.ts | 0% | 0% | 0% | 0% |
 | **runtime** | | | | |
+| consent-mode.ts | 95.23% | 90% | 100% | 100% |
+| css-vars.ts | 100% | 100% | 100% | 100% |
 | default-state.ts | 100% | 100% | 100% | 100% |
-| plugin.ts | 0% | 0% | 0% | 0% |
+| localize.ts | 100% | 100% | 100% | 100% |
+| plugin.ts | 96.29% | 95% | 87.5% | 96.66% |
+| revoke.ts | 95% | 76.92% | 100% | 100% |
 | texts.ts | 100% | 100% | 100% | 100% |
-| **All files** | **53.62%** | **63.39%** | **50%** | **53.68%** |
+| **All files** | **88.85%** | **84.11%** | **83.69%** | **89.15%** |
 
-> Coverage from 31 tests (`bun run test:coverage` in `packages/cookie-consent`). The plugin, `useConsentCookie` and
-> `useRequestConsent` have no unit tests yet; the playground exercises them.
+> Coverage from 69 tests (`bun run test:coverage` in `packages/cookie-consent`). `useRequestConsent` and
+> `useConsentLocalized` have no unit tests of their own; the playground's screenshot suite exercises them.
 
 <!-- /automd -->
 

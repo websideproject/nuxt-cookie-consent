@@ -54,7 +54,64 @@ export interface CategoryOptions {
    * banner (e.g. session replays: off until switched on from the floating button / settings).
    */
   defaultEnabled?: boolean
+  /**
+   * Reload the page when the visitor withdraws this category's consent, after it was granted on the current page.
+   * Overrides the module-level `reloadOnRevoke`.
+   */
+  reloadOnRevoke?: boolean
+  /**
+   * The cookies this category sets. They are listed in the modal (cookie kind), and deleted when consent is
+   * withdrawn. An `id` ending in `*` matches by prefix (`_ga_*`).
+   */
   cookies?: CookieDefinition[]
+}
+
+/** The Google Consent Mode v2 consent types. */
+export type ConsentModeType
+  = | 'ad_storage'
+    | 'ad_user_data'
+    | 'ad_personalization'
+    | 'analytics_storage'
+    | 'functionality_storage'
+    | 'personalization_storage'
+    | 'security_storage'
+
+export interface GoogleConsentModeOptions {
+  /**
+   * Category → the Consent Mode types it grants. A type is `granted` only while every category mapped to it is
+   * granted; a type no category maps is always `denied`.
+   */
+  mapping: Record<string, ConsentModeType | ConsentModeType[]>
+  /** Milliseconds Google tags wait for the visitor's stored choice before firing. @default 500 */
+  waitForUpdate?: number
+}
+
+/** The options the plugin reads from the public runtime config, beside `categories`, `texts` and the rest. */
+export interface ConsentRuntimeOptions {
+  cookieName?: string
+  consentVersion?: string | null
+  expiresInDays?: number
+  reloadOnRevoke?: boolean
+  googleConsentMode?: GoogleConsentModeOptions | false
+}
+
+/** What the companion `<cookieName>_meta` cookie stores: the policy version consented to and when. */
+export interface ConsentMeta {
+  version: string | null
+  at: number
+}
+
+/** How a choice was committed: `acceptAll()`, `rejectAll()`, or a selection saved with `updateState()`. */
+export type ConsentAction = 'acceptAll' | 'rejectAll' | 'save'
+
+export interface ConsentChangeEvent {
+  state: Record<string, boolean>
+  previous: Record<string, boolean>
+  /** Categories that went from off to on. */
+  granted: string[]
+  /** Categories that went from on to off. */
+  revoked: string[]
+  action: ConsentAction
 }
 
 // Define the shape of the plugin we are providing
@@ -68,12 +125,31 @@ interface ConsentPlugin {
   currentLocale: Ref<string>
   setLocale: (newLocale: string) => void
   setRequestContext: (context: ConsentCategory | null) => void
-  updateState: (newState: Record<ConsentCategory, boolean>) => void
+  /** When the stored choice was made (ms since epoch), `null` before the visitor has chosen. */
+  consentedAt: Ref<number | null>
+  /** The `consentVersion` the module is configured with. */
+  consentVersion: string | null
+  /** Grant every category. */
+  acceptAll: () => Promise<void>
+  /** Withdraw every category that is not `readonly`. */
+  rejectAll: () => Promise<void>
+  /** Commit a selection. Readonly categories stay granted. */
+  updateState: (newState: Record<ConsentCategory, boolean>) => Promise<void>
 }
+
+type HookResult = Promise<void> | void
 
 declare module '#app' {
   interface NuxtApp {
     $consent: ConsentPlugin
+  }
+  interface RuntimeNuxtHooks {
+    /** A choice was committed. Fires in the browser only, not for the choice restored from the cookie. */
+    'consent:changed': (event: ConsentChangeEvent) => HookResult
+    /** A category went from off to on. */
+    'consent:granted': (category: string) => HookResult
+    /** A category went from on to off: stop what it started here; its cookies are deleted after this hook. */
+    'consent:revoked': (category: string) => HookResult
   }
 }
 declare module 'vue' {

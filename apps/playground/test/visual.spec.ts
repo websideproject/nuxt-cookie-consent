@@ -89,6 +89,18 @@ const SHOTS: Shot[] = [
     },
   },
 
+  {
+    // After "Reject All": the banner is gone, the floating button reopens the settings, and the consent-gated
+    // script never loads
+    name: 'rejected', viewport: DESKTOP,
+    act: async (page) => {
+      await banner(page).getByRole('button', { name: 'Reject All' }).click()
+      await expect(banner(page)).toBeHidden()
+      await expect(page.getByRole('button', { name: 'Manage cookie settings' })).toBeVisible()
+      await expect(page.getByTestId('analytics-script')).toContainText('waiting for consent')
+    },
+  },
+
   // Dark mode: the page in Nuxt UI's dark theme, the module's components in their `darkColors`
   { name: 'banner', viewport: DESKTOP, dark: true },
   { name: 'modal', viewport: DESKTOP_TALL, dark: true, crop: dialog, act: page => customize(page) },

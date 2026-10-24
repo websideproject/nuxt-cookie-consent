@@ -27,6 +27,19 @@ export default defineNuxtConfig({
     locale: 'en',
     fallbackLocale: 'en',
 
+    // Bump it when the cookie policy changes: every visitor is asked again.
+    consentVersion: '1',
+    expiresInDays: 180,
+
+    // Google Consent Mode v2: `default` (denied) in the head, then an `update` from the visitor's choice.
+    googleConsentMode: {
+      mapping: {
+        necessary: 'security_storage',
+        preferences: ['functionality_storage', 'personalization_storage'],
+        analytics: 'analytics_storage',
+      },
+    },
+
     linkMap: {
       privacy: '/privacy-policy',
       imprint: '/imprint',

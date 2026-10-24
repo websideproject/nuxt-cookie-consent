@@ -20,6 +20,8 @@ vi.mock('#imports', () => ({
 
 function setup(opts: { requiresInitialConsent?: boolean, hasMadeChoice?: boolean, state?: Record<string, boolean>, categories?: Record<string, any> } = {}) {
   const updateState = vi.fn()
+  const acceptAll = vi.fn()
+  const rejectAll = vi.fn()
   env.consent = {
     hasMadeChoice: r(opts.hasMadeChoice ?? false),
     state: r(opts.state ?? { necessary: true, analytics: false }),
@@ -27,13 +29,15 @@ function setup(opts: { requiresInitialConsent?: boolean, hasMadeChoice?: boolean
     requestContext: r(null),
     currentLocale: r('en'),
     updateState,
+    acceptAll,
+    rejectAll,
   }
   env.config = {
     requiresInitialConsent: opts.requiresInitialConsent ?? true,
     categories: opts.categories ?? { necessary: {}, analytics: {} },
     colors: {}, fallbackLocale: 'en', texts: { en: {} }, linkMap: {},
   }
-  return { updateState, consent: env.consent }
+  return { updateState, acceptAll, rejectAll, consent: env.consent }
 }
 
 describe('useConsentBanner', () => {
@@ -46,10 +50,12 @@ describe('useConsentBanner', () => {
     expect(useConsentBanner().isVisible.value, 'consent not required → hidden').toBe(false)
   })
 
-  it('acceptAll commits every category as true', () => {
-    const { updateState } = setup({ state: { necessary: true, analytics: false, marketing: false } })
+  it('acceptAll and rejectAll commit through $consent', () => {
+    const { acceptAll, rejectAll } = setup()
     useConsentBanner().acceptAll()
-    expect(updateState).toHaveBeenCalledWith({ necessary: true, analytics: true, marketing: true })
+    expect(acceptAll).toHaveBeenCalledTimes(1)
+    useConsentBanner().rejectAll()
+    expect(rejectAll).toHaveBeenCalledTimes(1)
   })
 
   it('customize opens the settings modal', () => {
@@ -77,12 +83,20 @@ describe('useConsentFab', () => {
 })
 
 describe('useConsentModal', () => {
-  it('acceptAll sets every category true and closes the modal', () => {
-    const { updateState, consent } = setup({ categories: { necessary: {}, analytics: {}, marketing: {} } })
+  it('acceptAll commits through $consent and closes the modal', () => {
+    const { acceptAll, consent } = setup()
     consent.isModalOpen.value = true
     useConsentModal().acceptAll()
-    expect(updateState).toHaveBeenCalledWith({ necessary: true, analytics: true, marketing: true })
+    expect(acceptAll).toHaveBeenCalledTimes(1)
     expect(consent.isModalOpen.value, 'closes after accept').toBe(false)
+  })
+
+  it('rejectAll commits through $consent and closes the modal', () => {
+    const { rejectAll, consent } = setup()
+    consent.isModalOpen.value = true
+    useConsentModal().rejectAll()
+    expect(rejectAll).toHaveBeenCalledTimes(1)
+    expect(consent.isModalOpen.value, 'closes after reject').toBe(false)
   })
 
   it('saveSelection commits the per-category local choices', () => {

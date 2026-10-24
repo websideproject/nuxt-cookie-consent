@@ -31,6 +31,10 @@ export function useConsentCookie<T>(
     if (isGranted && !wasGranted) {
       readFromCookie()
     }
+    // Consent withdrawn: the cookie goes; the value lives on in memory for this page only.
+    else if (!isGranted && wasGranted) {
+      useCookie<T>(name, { ...options, readonly: false }).value = null as T
+    }
   })
 
   const consentCookie = computed<T | null | undefined>({
