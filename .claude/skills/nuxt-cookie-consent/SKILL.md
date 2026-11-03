@@ -17,6 +17,8 @@ and composables to gate cookies and scripts per category.
 - Loading a third-party script only after consent (`useScript` + `$consent.triggers.<category>`)
 - Writing a cookie only after consent (`useConsentCookie`)
 - Asking for one category at the moment a feature needs it (`useRequestConsent`)
+- Re-asking after a policy change or after a time (`consentVersion`, `expiresInDays`)
+- Reacting to a choice (`consent:changed` / `consent:granted` / `consent:revoked` hooks), Google Consent Mode v2
 - Replacing the default components with your own UI kit, or using the module headless
 
 ## Install
@@ -64,6 +66,10 @@ export default defineNuxtConfig({
 | `colors` | `Partial<ColorOptions>` | neutral palette | CSS variables for the default components: `background`, `foreground`, `primary`, `primaryForeground`, `secondary`, `secondaryForeground`, `border`, `borderInput`. |
 | `darkColors` | `Partial<ColorOptions> \| false` | dark neutral palette | Used instead of `colors` under a `.dark` ancestor (Nuxt color mode's class on `<html>`). `false` = `colors` in both modes. |
 | `cookieName` | `string` | `'cookie_consent'` | Renaming it makes every visitor decide again. |
+| `consentVersion` | `string` | — | Policy version, stored with the choice (`<cookieName>_meta`). Changing it asks every visitor again; setting it the first time asks everyone once. |
+| `expiresInDays` | `number` | `365` | A choice older than this is asked again. |
+| `reloadOnRevoke` | `boolean` | `true` | Reload when a category granted on this page is withdrawn (scripts cannot be unloaded). Also per category. |
+| `googleConsentMode` | `{ mapping, waitForUpdate? } \| false` | `false` | `mapping`: category → Consent Mode type(s). Sends `default` from the head and `update` on load and every change, into `window.dataLayer`. A type is granted only while every category mapped to it is; unmapped types are `denied`. |
 
 ### `CategoryOptions`
 
@@ -71,10 +77,11 @@ export default defineNuxtConfig({
 |---|---|
 | `readonly` | Always on, cannot be toggled (use for `necessary`). |
 | `kind` | `'cookie'` (default): modal shows a provider/duration table from `cookies[]`. `'tracking'`: a plain toggle + `description`, no table, `cookies[]` not needed (cookieless analytics). |
-| `cookies` | `{ id, descriptionKey, provider, duration, requiresBanner? }[]` — `descriptionKey` is a path into `texts`; `provider` and `duration` are a string or one per locale (`{ en: '1 year', de: '1 Jahr' }`). |
+| `cookies` | `{ id, descriptionKey, provider, duration, requiresBanner? }[]` — `descriptionKey` is a path into `texts`; `provider` and `duration` are a string or one per locale (`{ en: '1 year', de: '1 Jahr' }`). Deleted when the category is withdrawn; an `id` ending in `*` matches by prefix (`_ga_*`). |
 | `description` | Shown in the modal (mainly for `kind: 'tracking'`); a string or one per locale. Falls back to `texts.<locale>.categories.<key>.description`. |
 | `requiresBanner` | Forces (or suppresses) the first-visit banner for this category. |
 | `defaultEnabled` | State before the visitor chooses. |
+| `reloadOnRevoke` | Overrides the module option for this category. |
 
 **When is the banner shown?** Only if some non-readonly category requires it:
 - `kind: 'tracking'` → only when `requiresBanner: true` (default is opt-out: on, no banner).
@@ -93,6 +100,9 @@ $consent.state.value.analytics          // boolean per category (Ref<Record<Cons
 $consent.hasMadeChoice.value            // true once a choice is persisted in the consent cookie
 $consent.isModalOpen.value = true       // open the settings modal
 $consent.updateState({ ...$consent.state.value, analytics: true }) // update + persist
+$consent.acceptAll()                    // every category on
+$consent.rejectAll()                    // every non-readonly category off, opt-out tracking included
+$consent.consentedAt.value              // ms when the stored choice was made, null before
 $consent.triggers.analytics             // Promise, resolved when the category is granted
 $consent.currentLocale.value            // current UI locale
 $consent.setLocale('de')
@@ -103,11 +113,11 @@ $consent.setLocale('de')
 | Composable | Use |
 |---|---|
 | `useRequestConsent(category)` | `Promise<boolean>`. Resolves `true` immediately if granted (or `'necessary'`); otherwise opens the modal with a context message and resolves with the choice when it closes. |
-| `useConsentCookie<T>(name, category, cookieOptions)` | Like `useCookie`, but the value is only written to the cookie while the category is granted; it is read back once consent is given. Takes `useCookie` options (`default`, `maxAge`, …). |
+| `useConsentCookie<T>(name, category, cookieOptions)` | Like `useCookie`, but the value is only written to the cookie while the category is granted; it is read back once consent is given, and the cookie is deleted when consent is withdrawn. Takes `useCookie` options (`default`, `maxAge`, …). |
 | `useConsentText(key, replacements?)` | Localized text as a non-empty array of parts `{ type: 'string' \| 'link', content, href? }`, so `{privacy}`-style placeholders render as links. `[0].content` for plain strings. |
 | `useConsentLocalized(value)` | A `provider` / `duration` / `description` value in the active locale (string as-is; `{ en, de }` by locale, then `fallbackLocale`). |
-| `useConsentBanner()` | `{ isVisible, acceptAll, customize, colors, darkColors }` |
-| `useConsentModal()` | `{ isOpen, categories, localConsentState, openAccordions, contextualMessage, acceptAll, saveSelection, closeModal, toggleAccordion, colors, darkColors }` — `categories` is `[key, CategoryOptions][]`; `contextualMessage` is text parts (empty unless opened by `useRequestConsent`). |
+| `useConsentBanner()` | `{ isVisible, acceptAll, rejectAll, customize, colors, darkColors }` |
+| `useConsentModal()` | `{ isOpen, categories, localConsentState, openAccordions, contextualMessage, acceptAll, rejectAll, saveSelection, closeModal, toggleAccordion, colors, darkColors }` — `categories` is `[key, CategoryOptions][]`; `contextualMessage` is text parts (empty unless opened by `useRequestConsent`). |
 | `useConsentFab()` | `{ isVisible, openModal, colors, darkColors }` — visible once a choice is made, or from the start when no banner is required. |
 
 ## Common patterns
@@ -121,16 +131,23 @@ useScript('https://example.com/analytics.js', { trigger: $consent.triggers.analy
 </script>
 ```
 
-The trigger resolves once, on grant. It is not reset on revoke: `useScript` will not unload the script. When revoking
-must stop tracking, gate the tracker on the state instead:
+The trigger resolves once, on grant, and is not reset on revoke: `useScript` cannot unload a script. So withdrawing a
+category deletes its declared `cookies` and reloads the page (`reloadOnRevoke`). To stop a tracker without a reload,
+set `reloadOnRevoke: false` on the category and stop it in the hook:
 
 ```ts
-// app/plugins/analytics.client.ts
-export default defineNuxtPlugin(() => {
-  const { $consent } = useNuxtApp()
-  watch(() => $consent.state.value.analytics === true, on => myTracker.setEnabled(on), { immediate: true })
+// app/plugins/consent-events.client.ts
+export default defineNuxtPlugin((nuxtApp) => {
+  nuxtApp.hook('consent:revoked', (category) => { if (category === 'analytics') myTracker.stop() })
 })
 ```
+
+### React to a choice
+
+Runtime hooks, browser only, awaited in order (not fired for the choice restored on load):
+`consent:changed` (`{ state, previous, granted, revoked, action: 'acceptAll' | 'rejectAll' | 'save' }`),
+then `consent:granted` (category) per granted, `consent:revoked` (category) per revoked. Cookie deletion and the
+reload run after the hooks, even if one throws.
 
 ### Just-in-time consent for a feature
 
@@ -191,5 +208,7 @@ Build it on the composables above; see [references/custom-ui.md](references/cust
 - Do not list `@nuxt/scripts` in `modules` — the module installs it.
 - Category keys in `texts.<locale>.categories.<key>` (`name`, `description`) label the modal; add them for custom keys.
 - `necessary` must be `readonly: true`; `useRequestConsent('necessary')` always resolves `true`.
-- The consent cookie (`cookie_consent`) is itself strictly necessary; renaming it (`cookieName`) resets every visitor.
+- The consent cookie (`cookie_consent`) and `cookie_consent_meta` are themselves strictly necessary; renaming `cookieName` resets every visitor.
+- Keep **Reject All** in a custom banner/modal, as prominent as Accept All (`rejectAll`, text `rejectAllBtn`).
+- Only `acceptAll` / `rejectAll` / `updateState` fire the hooks and the withdrawal; writing `$consent.state.value` directly does not.
 - Using the module does not make a site compliant by itself — cookie descriptions and choices remain the site's responsibility.

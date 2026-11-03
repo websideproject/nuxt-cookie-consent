@@ -9,7 +9,7 @@ All state and actions come from the composables; the components only supply mark
 ```vue
 <!-- app/components/CookieConsentBanner.vue -->
 <script setup lang="ts">
-const { isVisible, acceptAll, customize } = useConsentBanner()
+const { isVisible, acceptAll, rejectAll, customize } = useConsentBanner()
 </script>
 
 <template>
@@ -21,6 +21,7 @@ const { isVisible, acceptAll, customize } = useConsentBanner()
       </template>
     </p>
     <button @click="customize">{{ useConsentText('customizeBtn')[0].content }}</button>
+    <button @click="rejectAll">{{ useConsentText('rejectAllBtn')[0].content }}</button>
     <button @click="acceptAll">{{ useConsentText('acceptAllBtn')[0].content }}</button>
   </div>
 </template>
@@ -33,7 +34,7 @@ const { isVisible, acceptAll, customize } = useConsentBanner()
 ```vue
 <!-- app/components/CookieConsentModal.vue -->
 <script setup lang="ts">
-const { isOpen, categories, localConsentState, contextualMessage, acceptAll, saveSelection, closeModal } = useConsentModal()
+const { isOpen, categories, localConsentState, contextualMessage, acceptAll, rejectAll, saveSelection, closeModal } = useConsentModal()
 </script>
 
 <template>
@@ -50,6 +51,7 @@ const { isOpen, categories, localConsentState, contextualMessage, acceptAll, sav
            provider, duration and description may be per-locale objects: render them with useConsentLocalized(…) -->
     </section>
     <button @click="saveSelection">{{ useConsentText('acceptSelectionBtn')[0].content }}</button>
+    <button @click="rejectAll">{{ useConsentText('rejectAllBtn')[0].content }}</button>
     <button @click="acceptAll">{{ useConsentText('acceptAllBtn')[0].content }}</button>
     <button @click="closeModal">×</button>
   </div>
@@ -57,7 +59,7 @@ const { isOpen, categories, localConsentState, contextualMessage, acceptAll, sav
 ```
 
 - `localConsentState` is a working copy: it is reset from `$consent.state` each time the modal opens and committed only
-  by `saveSelection()` (or `acceptAll()`).
+  by `saveSelection()` (or `acceptAll()` / `rejectAll()`).
 - `contextualMessage` (text parts) is non-empty when the modal was opened by `useRequestConsent(category)`; closing the modal resolves
   that request with the category's state.
 - Group `categories` by `category.kind` to show cookie tables and cookieless toggles in separate sections.

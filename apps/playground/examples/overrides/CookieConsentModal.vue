@@ -6,6 +6,7 @@ const {
   localConsentState,
   contextualMessage,
   acceptAll,
+  rejectAll,
   saveSelection,
   closeModal,
 } = useConsentModal()
@@ -96,6 +97,12 @@ const {
           @click="saveSelection"
         >
           {{ useConsentText('acceptSelectionBtn')[0].content }}
+        </button>
+        <button
+          class="cc-btn"
+          @click="rejectAll"
+        >
+          {{ useConsentText('rejectAllBtn')[0].content }}
         </button>
         <button
           class="cc-btn"

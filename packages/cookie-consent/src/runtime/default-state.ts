@@ -20,3 +20,15 @@ export function defaultConsentState(categories: Record<string, CategoryOptions |
   state.necessary = true
   return state
 }
+
+/**
+ * Every category granted (`granted: true`, accept all) or every category withdrawn except the `readonly` ones and
+ * `necessary` (`granted: false`, reject all — opt-out tracking included).
+ */
+export function uniformConsentState(categories: Record<string, CategoryOptions | undefined>, granted: boolean): Record<string, boolean> {
+  const state: Record<string, boolean> = {}
+  for (const [key, cat] of Object.entries(categories))
+    state[key] = granted || cat?.readonly === true
+  state.necessary = true
+  return state
+}

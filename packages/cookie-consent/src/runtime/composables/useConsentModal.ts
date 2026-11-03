@@ -33,15 +33,21 @@ export function useConsentModal() {
   })
 
   function acceptAll() {
-    const allConsents: Record<string, boolean> = {}
-    categories.value.forEach(([key]) => (allConsents[key] = true))
-    $consent.updateState(allConsents)
+    const committed = $consent.acceptAll()
     $consent.isModalOpen.value = false
+    return committed
+  }
+
+  function rejectAll() {
+    const committed = $consent.rejectAll()
+    $consent.isModalOpen.value = false
+    return committed
   }
 
   function saveSelection() {
-    $consent.updateState(localConsentState.value)
+    const committed = $consent.updateState(localConsentState.value)
     $consent.isModalOpen.value = false
+    return committed
   }
 
   function closeModal() {
@@ -67,6 +73,7 @@ export function useConsentModal() {
     openAccordions,
     contextualMessage,
     acceptAll,
+    rejectAll,
     saveSelection,
     closeModal,
     toggleAccordion,

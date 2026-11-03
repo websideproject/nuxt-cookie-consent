@@ -1,7 +1,7 @@
 import { defineNuxtModule, addPlugin, createResolver, addComponentsDir, addImportsDir, installModule } from '@nuxt/kit'
 import { defu } from 'defu'
 import { defaultTexts } from './runtime/texts'
-import type { CategoryOptions, ColorOptions } from './runtime/types'
+import type { CategoryOptions, ColorOptions, GoogleConsentModeOptions } from './runtime/types'
 
 export interface ModuleOptions {
   locale?: string
@@ -17,6 +17,20 @@ export interface ModuleOptions {
   categories: Record<string, CategoryOptions>
   /** Name of the cookie that stores the consent decision. @default 'cookie_consent' (P12.M4). */
   cookieName?: string
+  /**
+   * The version of your cookie policy. Change it and every visitor is asked again; a choice made under another
+   * version no longer counts. Setting it for the first time asks everyone once.
+   */
+  consentVersion?: string
+  /** Days a choice is kept before the visitor is asked again. @default 365 */
+  expiresInDays?: number
+  /**
+   * Reload the page when the visitor withdraws a category that was granted on the current page, so the scripts it
+   * started stop. A category's own `reloadOnRevoke` wins. @default true
+   */
+  reloadOnRevoke?: boolean
+  /** Send Google Consent Mode v2 `default` / `update` commands from the consent state. Off unless set. */
+  googleConsentMode?: GoogleConsentModeOptions | false
 }
 
 export default defineNuxtModule<ModuleOptions>({
@@ -31,6 +45,9 @@ export default defineNuxtModule<ModuleOptions>({
     locale: 'en',
     fallbackLocale: 'en',
     cookieName: 'cookie_consent',
+    expiresInDays: 365,
+    reloadOnRevoke: true,
+    googleConsentMode: false,
     colors: {
       background: 'hsl(0 0% 100%)',
       foreground: 'hsl(240 10% 3.9%)',
@@ -101,6 +118,10 @@ export default defineNuxtModule<ModuleOptions>({
       locale: options.locale,
       fallbackLocale: options.fallbackLocale,
       cookieName: options.cookieName || 'cookie_consent',
+      consentVersion: options.consentVersion ?? null,
+      expiresInDays: options.expiresInDays ?? 365,
+      reloadOnRevoke: options.reloadOnRevoke ?? true,
+      googleConsentMode: options.googleConsentMode || false,
       colors: options.colors,
       darkColors: options.darkColors,
       texts: finalTexts,

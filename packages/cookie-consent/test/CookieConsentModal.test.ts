@@ -26,6 +26,7 @@ describe('<CookieConsentModal>', () => {
       contextualMessage: ref([]),
       colors: {},
       acceptAll: vi.fn(),
+      rejectAll: vi.fn(),
       saveSelection: vi.fn(),
       closeModal: vi.fn(),
       toggleAccordion: vi.fn(),
@@ -43,11 +44,13 @@ describe('<CookieConsentModal>', () => {
     expect(w.findAll('.cc-cat').length).toBe(2)
   })
 
-  it('the primary action accepts all; the outline action saves the selection', async () => {
+  it('the footer accepts all, rejects all, or saves the selection', async () => {
     const w = mount(CookieConsentModal, { global: { stubs: { teleport: true } } })
-    await w.find('.cc-btn--primary').trigger('click')
+    await w.find('.cc-btn--accept').trigger('click')
     expect(m.modal.acceptAll).toHaveBeenCalledTimes(1)
-    await w.find('.cc-btn--outline').trigger('click')
+    await w.find('.cc-btn--reject').trigger('click')
+    expect(m.modal.rejectAll).toHaveBeenCalledTimes(1)
+    await w.find('.cc-btn--save').trigger('click')
     expect(m.modal.saveSelection).toHaveBeenCalledTimes(1)
   })
 

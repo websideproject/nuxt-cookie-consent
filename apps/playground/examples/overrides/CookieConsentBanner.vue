@@ -1,6 +1,6 @@
 <script setup lang="ts">
 // Dependency-free override of the module's banner. Uses the module's composables.
-const { isVisible, acceptAll, customize } = useConsentBanner()
+const { isVisible, acceptAll, rejectAll, customize } = useConsentBanner()
 </script>
 
 <template>
@@ -28,6 +28,12 @@ const { isVisible, acceptAll, customize } = useConsentBanner()
         @click="customize"
       >
         {{ useConsentText('customizeBtn')[0].content }}
+      </button>
+      <button
+        class="cc-btn"
+        @click="rejectAll"
+      >
+        {{ useConsentText('rejectAllBtn')[0].content }}
       </button>
       <button
         class="cc-btn"
